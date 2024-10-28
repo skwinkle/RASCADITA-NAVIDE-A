@@ -43,3 +43,17 @@ CREATE TABLE IF NOT EXISTS Detalle_Pedido (
     FOREIGN KEY (id_pedido) REFERENCES Pedidos(id_pedido),
     FOREIGN KEY (id_producto) REFERENCES Productos(id_producto)
 );
+
+ALTER TABLE Detalle_Pedido
+ADD COLUMN id_cliente INT,
+ADD FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente);
+
+INSERT INTO Productos (id_producto, nombre, descripcion, precio, stock)
+VALUES
+    (1, 'Pan De Muerto chico Nuez', 'Pan pequeño con sabor a nuez, típico del Día de Muertos', 15.00, 50),
+    (2, 'Pastel calabaza', 'Pastel de calabaza especial para Halloween', 25.00, 30),
+    (3, 'Pan Muerto Ch Crema Batida', 'Pan de muerto chico con crema batida', 20.00, 45),
+    (4, 'Pan De Muerto Grande Mantequilla', 'Pan de muerto grande con mantequilla', 35.00, 20);
+	
+SELECT * FROM panaderiadb.clientes;
+SELECT * FROM panaderiadb.productos;

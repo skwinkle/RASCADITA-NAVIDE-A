@@ -132,6 +132,58 @@ app.post('/borrarUsuario', (req, res) => {
     });
 });
 
+app.post('/editProductos', (req, res) => {
+    const { id_producto, cantidad } = req.body;
+
+
+    if (isNaN(cantidad) || cantidad < 0) {
+        return res.status(400).send('La cantidad debe ser un número válido y mayor o igual a 0.');
+    }
+
+
+    con.query('SELECT * FROM Productos WHERE id_producto = ?', [id_producto], (err, result) => {
+        if (err) {
+            console.error('Error en la consulta:', err);
+            return res.status(500).send('Error en la consulta');
+        }
+        
+        if (result.length === 0) {
+            return res.status(404).send('Producto no encontrado');
+        }
+
+
+        con.query('UPDATE Productos SET stock = ? WHERE id_producto = ?', [cantidad, id_producto], (err, result) => {
+            if (err) {
+                console.error('Error al actualizar la cantidad del producto:', err);
+                return res.status(500).send('Error al actualizar la cantidad del producto');
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).send('Producto no encontrado');
+            }
+
+            res.status(200).send('Cantidad del producto actualizada con éxito');
+        });
+    });
+});
+
+app.get('/getCantidad/:id_producto', (req, res) => {
+    const { id_producto } = req.params;
+
+    con.query('SELECT stock FROM Productos WHERE id_producto = ?', [id_producto], (err, result) => {
+        if (err) {
+            console.error('Error en la consulta:', err);
+            return res.status(500).send('Error en la consulta');
+        }
+
+        if (result.length === 0) {
+            return res.status(404).send('Producto no encontrado');
+        }
+
+
+        res.status(200).json({ cantidad: result[0].stock });
+    });
+});
 
 app.listen(3000, () => {
     console.log('Servidor escuchando en el puerto 3000');

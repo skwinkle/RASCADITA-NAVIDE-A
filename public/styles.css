@@ -374,6 +374,43 @@ label {
     color: rgb(141, 141, 141);
 }
 
+.Wrapper__OrganizarProductos {
+    display: grid; 
+    grid-template-columns: repeat(1, 1fr); 
+    gap: 20px; 
+    width: 30%;
+    padding: 20px; 
+    height: fit-content;
+    border: 2px solid #0003;
+    border-radius: 10px;
+    box-shadow: 0 0 50px 30px #0002;
+    background-color: white;
+}
+
+.wrapper__delwrapper {
+    height: 65dvh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    margin: 20px;
+}
+
+.Wrapper__OrganizarProductos > h2{
+    text-align: center;
+}
+
+.product__title {
+    text-align: center;
+    padding: 10px;
+    margin: 20px;
+}
+
+.product__title  h1 {
+    filter: drop-shadow(0 0 20px #8d8c8c);
+}
+
 
 /** Animacion Scroll */
 

@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
 </head>
 <body>
     <nav class="nav">
@@ -20,62 +19,32 @@
             <a href="datos.html"><li class="nav__listitem material-icons">person</li></a>
         </ul>
     </nav>
-    <div class="button__ordenar">
-        <h2 class="button__ordenar--text">ORDENA AQUI</h2>
-        <span class="button__ordenar--img material-icons material-symbols-outlined">bakery_dining</span>
+    <div class="product__title">
+        <h1>BIENVENIDO A LA ORGANIZACIÓN DE SUS PRODUCTOS</h1>
     </div>
-    <div class="image__container">
-    </div>
-    <div class="textmiado">
-        ¡Hola! Bienvenido
-    </div>
-    <div class="wrapper__productos">
-        <div class="productos__griditem">
-            <div class="productos__img">
-            </div>
-            <div class="productos__wrapertext">
-                <p class="productos__name">Pan De Muerto chico Nuez</p>
-                <p class="productos__precio">$25.00</p>
-            </div>
+
+    <div class="wrapper__delwrapper">
+        <div class="Wrapper__OrganizarProductos">
+            <h2>MODIFIQUE LA CANTIDAD DE SUS PRODUCTOS</h2>
+            <form id="editProductosform" action="/editProductos" method="post">
+                <input type="hidden" name="id_producto" id="id_producto"> 
+                <label for="selectProduct">Escoja su producto:</label>
+                <select id="producto" name="producto" class="form__input" required>
+                    <option value="" disabled selected>Elige un pan</option>
+                    <option value="1">Pan De Muerto chico Nuez</option>
+                    <option value="2">Pastel calabaza</option>
+                    <option value="3">Pan Muerto Ch Crema Batida</option>
+                    <option value="4">Pan De Muerto Grande Mantequilla</option>
+                </select>
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" name="cantidad" id="cantidad" class="form__input" required readonly>
+                <input type="submit" value="GUARDAR" class="form__button">
+            </form>
         </div>
-        <div class="productos__griditem">
-            <div class="productos__img">
-            </div>
-            <div class="productos__wrapertext">
-                <p class="productos__name">Pastel calabaza</p>
-                <p class="productos__precio">$350.00</p>
-            </div>
-        </div>
-        <div class="productos__griditem">
-            <div class="productos__img">
-            </div>
-            <div class="productos__wrapertext">
-                <p class="productos__name">Pan Muerto Ch Crema Batida</p>
-                <p class="productos__precio">$50.00</p>
-            </div>
-        </div>
-        <div class="productos__griditem">
-            <div class="productos__img">
-            </div>
-            <div class="productos__wrapertext">
-                <p class="productos__name">Pan Muerto Mediano Nuez</p>
-                <p class="productos__precio">$35.00</p>
-            </div>
-        </div>
-        <div class="productos__griditem">
-            <div class="productos__img">
-            </div>
-            <div class="productos__wrapertext">
-                <p class="productos__name">Pan De Muerto Grande Mantequilla</p>
-                <p class="productos__precio">$65.00</p>
-            </div>
-        </div>
-    </div>
-    <div class="wrapper__imagecotorra">
-        <img src="images/imagencotorra.png" alt="" class="imagecotorra">
     </div>
     <footer>
         FERNÁNDEZ ROJAS AXEL GIOVANNI
     </footer>
+    <script src="validarlol.js"></script>
 </body>
 </html>
