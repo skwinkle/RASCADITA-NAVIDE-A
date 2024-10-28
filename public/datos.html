@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desesperanza Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="../app.js"></script>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
+        <ul class="nav__list">
+            <a href=""><li class="nav__listitem">CATÁLOGO</li></a>
+            <a href="datos.html"><li class="nav__listitem material-icons">person</li></a>
+        </ul>
+    </nav>
+    <div class="wrapper__datos-lol">
+        <div class="wrapper__datos">
+            <h1 class="wrapper__datos--title">DATOS PERSONALES</h1>
+            <form id="editarUsuarioForm" action="/editarUsuario" method="post">
+                <label for="ide">Id:</label>
+                <input type="number" name="ide" id="ide" class="form__input" required>
+                <label for="name">Nombre:</label>
+                <input type="text" name="nombre" id="name" class="form__input" maxlength="30" required minlength="5">
+                <label for="correo">Correo:</label>
+                <input type="email" name="gmail" id="correo" class="form__input" maxlength="50" required>
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" name="telefono" id="telefono" class="form__input" required maxlength="14" minlength="14">
+                <input type="submit" value="GUARDAR" class="form__button">
+            </form>
+
+            <form id="borrarUsuarioForm" action="/borrarUsuario" method="post">
+                <label for="ideb">Id:</label>
+                <input type="number" name="ideb" id="ideb" class="form__input" required>
+                <input type="submit" value="BORRAR" class="form__button button__delete">
+            </form>
+
+            <div class="wrapper__form--anotherinfo">
+                <p class="wrapper__form--text">¿Aún no tienes cuenta?</p>
+                <a href="iniciosesion.html"  class="wrapper__form-link">REGISTRATE!</a>
+            </div>
+        </div>
+    </div>
+    <footer>
+        FERNÁNDEZ ROJAS AXEL GIOVANNI
+    </footer>
+    <script src="validacionesSRC.js"></script>
+
+    
+    
+</body>
+</html>

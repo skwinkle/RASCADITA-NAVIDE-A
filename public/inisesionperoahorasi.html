@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="app.js" defer></script>
+    <title>Desperanza Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&family=Raleway:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
+        <ul class="nav__list">
+            <a href="#"><li class="nav__listitem">CATÁLOGO</li></a>
+            <a href="datos.html"><li class="nav__listitem material-icons">person</li></a>
+        </ul>
+    </nav>
+    <div class="wrapper__content">
+        <div class="wrapper__form">
+            <form action="/iniciarUsuario" method="post">
+                <h1>INICIAR SESIÓN</h1>
+                <label for="correo"> Correo: </label>
+                <input type="email" name="gmail" id="correo" class="form__input" maxlength="50" required>
+                <label for="password"> Contraseña: </label>
+                <input type="password" name="password" id="password" class="form__input" required maxlength="10" minlength="5">
+                <input type="submit" value="Iniciar Sesión" class="form__button">
+            </form>
+        
+            <div class="wrapper__form--anotherinfo">
+                <p class="wrapper__form--text">¿Aún no tienes cuenta?</p><a href="iniciosesion.html" class="wrapper__form-link">REGISTRATE!</a>
+            </div>
+        </div>
+    </div>
+    <footer>
+        FERNÁNDEZ ROJAS AXEL GIOVANNI
+    </footer>
+    <script src="validacionesIN.js"></script>
+</body>
+</html>
