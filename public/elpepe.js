@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 alert(result.message);
                 formProducto.reset();
-                await loadProducts(); // Carga los productos después de agregar uno nuevo
+                await loadProducts(); 
             } else {
                 const errorResponse = await response.json();
                 alert("Error al agregar el producto: " + errorResponse.message);
@@ -39,13 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadProducts() {
         try {
-            const response = await fetch('/productos'); // Asegúrate de que este endpoint devuelva la lista de productos
+            const response = await fetch('/productos'); 
             if (!response.ok) throw new Error('Error al cargar productos.');
-
+    
             const products = await response.json();
-
-            productosGrid.innerHTML = ''; // Limpia la grid actual
-
+    
             products.forEach(product => {
                 const productItem = document.createElement('div');
                 productItem.classList.add('productos__griditem');
@@ -58,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="productos__precio">$${product.precio}</p>
                     </div>
                 `;
-                productosGrid.appendChild(productItem);
+                productosGrid.appendChild(productItem); 
             });
         } catch (error) {
             console.error("Error al cargar productos:", error);
@@ -66,6 +64,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Cargar productos al cargar la página
     loadProducts();
 });
