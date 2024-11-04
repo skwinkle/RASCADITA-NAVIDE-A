@@ -54,6 +54,6 @@ VALUES
     (2, 'Pastel calabaza', 'Pastel de calabaza especial para Halloween', 25.00, 30),
     (3, 'Pan Muerto Ch Crema Batida', 'Pan de muerto chico con crema batida', 20.00, 45),
     (4, 'Pan De Muerto Grande Mantequilla', 'Pan de muerto grande con mantequilla', 35.00, 20);
-	
+    
 SELECT * FROM panaderiadb.clientes;
 SELECT * FROM panaderiadb.productos;
