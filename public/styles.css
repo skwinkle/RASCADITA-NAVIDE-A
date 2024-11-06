@@ -75,9 +75,6 @@ nav h1 {
     overflow: hidden;
 }
 
-.image__container:hover {
-    background-image: url("./images/farsa.jpg");
-}
 
 .button__ordenar {
     display: flex;
@@ -168,53 +165,7 @@ nav h1 {
 }
 
 
-.productos__img:nth-child(1) {
-    background-image: url("./images/porno.jpg"); 
-}
 
-.productos__img:nth-child(1):hover {
-    background-image: url("./images/lamine.jpg"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(2) > .productos__img {
-    background-image: url("./images/pastel.png"); 
-}
-
-.productos__griditem:nth-child(2) > .productos__img:hover {
-    background-image: url("./images/porno1.jpg"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(3) > .productos__img {
-    background-image: url("./images/shemenshito.jpg"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(3) > .productos__img:hover {
-    background-image: url("./images/speed.avif"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(4) > .productos__img:hover {
-    background-image: url("./images/gavifour.avif"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(4) > .productos__img {
-    background-image: url("./images/panmedianonuez.jpg"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(5) > .productos__img {
-    background-image: url("./images/parngnirtgthi.png"); 
-    transform: scale(1);
-}
-
-.productos__griditem:nth-child(5) > .productos__img:hover {
-    background-image: url("./images/gavinigga.avif"); 
-    transform: scale(1);
-}
 
 .wrapper__imagecotorra {
     height: 100px;
@@ -226,13 +177,10 @@ nav h1 {
 }
 
 footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;
+    padding: 40px 0;
     width: 100%;
+    height: fit-content;
     background-color: #0001;
-    font-weight: 600;
 }
 
 .wrapper__form {
@@ -306,6 +254,7 @@ form h1 {
 }
 
 .form__button{
+    bottom: 0;
     background-color: #000;
     padding: 7px 10px;
     color: white;
@@ -411,6 +360,140 @@ label {
     filter: drop-shadow(0 0 20px #8d8c8c);
 }
 
+.wrapper__formulariocfff {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 20px;
+}
+
+.producto-form{
+    padding: 10px;
+    border: 5px solid #cccece;
+    width: clamp(700px,80%,1000px);
+    border-radius: 20px;
+    box-shadow: 0 0 10px 5px #0002;
+    margin-bottom: 40px;
+}
+
+.producto-form h3{
+    text-align: center;
+    margin: 30px;
+}
+
+.disenosuperior {
+    border-top: 1px solid black;
+    width: 3%;
+    margin: 5px;
+}
+
+.disenoinferior {
+    border-top: 1px solid black;
+    width: 5%;
+}
+
+.wrapperadornos{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+    flex-direction: column;
+}
+
+.producto-form h3{ 
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: 26px;
+    letter-spacing: 2px;
+}
+
+.imagenfondo{
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+    padding-top: 56.25%;  
+    position: relative;
+    overflow: hidden;
+}
+
+.footer__img .footer__image{
+    width: clamp(100px,100%,100%);
+}
+
+.imagenfondo1{
+    background-image: url(./images/bolillos.webp);
+}
+
+.imagenfondo2{
+    background-image: url(./images/lol.jpg);
+}
+
+.wrappercontent {
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    width: clamp(100px,100%,100%);
+    gap: 20px; 
+    padding: 20px; 
+    height: fit-content;
+}
+
+.footer__list {
+    list-style-type: none;
+
+}
+
+.footer__list li {
+    margin: 5px;
+    font-size: 15px;
+}
+
+.footer__list li:first-child {
+    color: #5e5f5f;
+    font-weight: 600;
+    user-select: none;
+    margin-bottom: 10px;
+}
+
+.footer__image h3 {
+    font-weight: 300;
+    margin: 30px;
+    font-size: 20px;
+    font-style: italic;
+    letter-spacing: 3px;
+}
+
+
+.logomiado{
+    width: 30px;
+}
+
+.iconsrow{
+    overflow: hidden;
+    height: 40px;
+    width: 100%;
+    margin-top: 40px;
+}
+
+.button__ordenar--img123{
+    background-color: inherit;
+    border-radius: 50%;
+    font-size: 50px;
+    color: #0001;
+    padding: 7px;
+}
+
+.footer__list li:hover:not(:first-child) {
+    text-decoration: underline; 
+    color: #8d8c8c;
+    filter: drop-shadow(0 0 20px #8d8c8c);
+    user-select: none;
+    font-weight: 700;
+}
+
+
 
 /** Animacion Scroll */
 
@@ -424,6 +507,12 @@ label {
 }
 
 @media (max-width: 700px) {
+    .wrapper__formulariocfff {
+        margin: 0;
+    }
+    .wrappercontent {
+        grid-template-columns: repeat(1, 1fr);
+    }
     .nav {
         display: block;
         top: 0;
@@ -462,7 +551,6 @@ label {
     }
     .wrapper__productos {
         grid-template-columns: repeat(1, 1fr);
-
     }
 
 
