@@ -7,32 +7,32 @@ const path = require("path");
 const app = express();
 const port = 3000;
 
-// Configuración de multer
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads'); // Carpeta donde se guardarán los archivos subidos
+        cb(null, 'uploads'); 
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Nombre del archivo
+        cb(null, Date.now() + path.extname(file.originalname)); 
     }
 });
 
 const upload = multer({ storage: storage });
 
-// Middleware para servir archivos estáticos
 app.use(express.static("public"));
+app.use('/uploads', express.static('uploads')); 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Conexión a la base de datos
+
 const con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "$$I0h17eSi$$", // Reemplaza con tu contraseña
+    password: "n0m3l0",
     database: "PanaderiaDB"
 });
 
-// Verificación de conexión a la base de datos
+
 con.connect((err) => {
     if (err) {
         console.error("Error al conectar a la base de datos:", err);
@@ -41,33 +41,33 @@ con.connect((err) => {
     }
 });
 
-// Ruta para la raíz
+
 app.get("/", (req, res) => {
     res.send("¡Bienvenido a la Panadería!");
 });
 
-// Endpoint para agregar productos
+
 app.post("/productos", upload.single('imagen'), (req, res) => {
     const { nombre, precio, stock } = req.body;
-    console.log("Datos recibidos:", req.body); // Muestra los datos recibidos
+    console.log("Datos recibidos:", req.body); 
 
     // Validaciones
     if (!nombre || isNaN(precio) || isNaN(stock)) {
         return res.status(400).json({ error: "Datos inválidos" });
     }
 
-    // Convierte a número
+
     const precioNum = parseFloat(precio);
     const stockNum = parseInt(stock, 10);
 
-    // Asegúrate de que las conversiones no sean NaN
+
     if (isNaN(precioNum) || isNaN(stockNum)) {
         return res.status(400).json({ error: "Precio o stock no son números válidos" });
     }
 
     const sql = "INSERT INTO Productos (nombre, precio, stock, imagen) VALUES (?, ?, ?, ?)";
     
-    // Guarda la ruta de la imagen en la base de datos
+
     const imagen = req.file ? req.file.filename : null;
 
     con.query(sql, [nombre, precioNum, stockNum, imagen], (err) => {
@@ -75,23 +75,27 @@ app.post("/productos", upload.single('imagen'), (req, res) => {
             console.error("Error en la consulta:", err.message);
             return res.status(500).json({ error: "Error al agregar producto: " + err.message });
         }
-        res.json({ message: "Producto agregado" });
+        res.json({ message: "Producto agregado", imagen: `/uploads/${imagen}` });
     });
 });
 
-// Endpoint para cargar productos
-app.get("/productos", (req, res) => {
+// Endpoint para cargar productosapp.get("/productos", (req, res) => {
     const sql = "SELECT * FROM Productos";
     con.query(sql, (err, results) => {
         if (err) {
             console.error("Error al cargar productos:", err.message);
             return res.status(500).json({ error: "Error al cargar productos" });
         }
+
+        results = results.map(producto => ({
+            ...producto,
+            imagen: producto.imagen ? `/uploads/${producto.imagen}` : null
+        }));
         res.json(results);
     });
 });
 
-// Puerto de escucha
+
 app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
 });

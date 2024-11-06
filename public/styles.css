@@ -7,6 +7,17 @@ body, ul, li, div, nav, h1,h2,h3,h4 {
     padding: 0;
 }
 
+.producto-form {
+    width: 80%;
+}
+
+.wrapperpepe {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 body {
     --var-bgcolor: #FFFFFF;
     --var-colortext: #000;
@@ -135,15 +146,8 @@ nav h1 {
 }
 
 .productos__griditem {
-    background-color: #5e5f5f; 
-    color: white; 
-    text-align: center; 
-    border-radius: 5px; 
-}
-
-.productos__griditem {
     background-color: white; 
-    color: white; 
+    color: #000; 
     padding: 20px; 
     text-align: center; 
     border-radius: 5px; 
@@ -155,17 +159,28 @@ nav h1 {
     display: inline-block;
 }
 
-.productos__img {
-    background-size: cover; 
-    background-position: center; 
+
+.productos__img img {
+    width: 200px; 
+    height: 200px;    
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.wrapper__imagecotorra {
+    height: 100px;
     width: 100%;
-    padding-top: 200%;
-    position: relative; 
-    overflow: hidden; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ffccb3b8c3485a0ba468e19727fcccd3f1342dc
 
 .wrapper__imagecotorra {
     height: 100px;

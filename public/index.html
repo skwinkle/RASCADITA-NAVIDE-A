@@ -16,8 +16,8 @@
     <nav class="nav">
         <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
         <ul class="nav__list">
-            <a href=""><li class="nav__listitem">CATÁLOGO</li></a>
-            <a href="datos.html"><li class="nav__listitem material-icons">person</li></a>
+            <a href="/"><li class="nav__listitem">CATÁLOGO</li></a>
+            <a href="/"><li class="nav__listitem material-icons">person</li></a>
         </ul>
     </nav>
     <div class="button__ordenar">
@@ -30,6 +30,7 @@
         ¡Hola! Bienvenido
     </div>
     <div class="wrapper__productos" id="productosGrid">
+<<<<<<< HEAD
         
     </div>
 
@@ -43,6 +44,34 @@
             <form id="formProducto" enctype="multipart/form-data" action="/productos" method="POST">
                 <label for="nombreProducto">Nombre:</label>
                 <input type="text" id="nombreProducto" name="nombre" class="form__input" maxlength="30" required minlength="5">
+=======
+
+    </div>
+    <div class="wrapperpepe">
+    <div class="producto-form">
+        <h3>Agregar Nuevo Producto</h3>
+        <form id="formProducto" enctype="multipart/form-data" action="/productos" method="POST">
+            <label for="nombreProducto">Nombre:</label>
+            <input type="text" id="nombreProducto" name="nombre" class="form__input" maxlength="30" required minlength="5">
+
+            <label for="precio">Precio:</label>
+            <input type="number" id="precio" name="precio" class="form__input" required min="0">
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" name="stock" class="form__input" required min="0">
+
+            <label for="imagen">Imagen:</label>
+            <input type="file" id="imagen" name="imagen" class="form__input" required>
+
+            <button type="submit" class="form__button button_reg">Agregar Producto</button>
+        </form>
+    </div>
+</div>
+
+    <footer>
+        FERNÁNDEZ ROJAS AXEL GIOVANNI
+    </footer>
+>>>>>>> 9ffccb3b8c3485a0ba468e19727fcccd3f1342dc
     
                 <label for="precio">Precio:</label>
                 <input type="number" id="precio" name="precio" class="form__input" required min="0">

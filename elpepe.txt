@@ -1,8 +1,13 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9ffccb3b8c3485a0ba468e19727fcccd3f1342dc
 CREATE DATABASE IF NOT EXISTS PanaderiaDB;
 USE PanaderiaDB;
 
 CREATE TABLE IF NOT EXISTS Productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
+<<<<<<< HEAD
     nombre VARCHAR(30) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL CHECK (precio >= 0),
     stock INT NOT NULL CHECK (stock >= 0),
@@ -42,3 +47,10 @@ CREATE TABLE IF NOT EXISTS Detalle_Pedido (
     FOREIGN KEY (id_pedido) REFERENCES Pedidos(id_pedido) ON DELETE CASCADE,
     FOREIGN KEY (id_producto) REFERENCES Productos(id) ON DELETE RESTRICT
 );
+=======
+    nombre VARCHAR(100) NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    imagen VARCHAR(255)
+);
+>>>>>>> 9ffccb3b8c3485a0ba468e19727fcccd3f1342dc
