@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desesperanza Online</title>
+    <title>Desesperanza Online ADMIN</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,19 +20,101 @@
             <a href="./inisesionperoahorasi.html"><li class="nav__listitem material-icons">person</li></a>
         </ul>
     </nav>
-    <div class="button__ordenar">
-        <h2 class="button__ordenar--text">ORDENA AQUI</h2>
-        <span class="button__ordenar--img material-icons material-symbols-outlined">bakery_dining</span>
-    </div>
     <div class="image__container">
     </div>
     <div class="textmiado">
-        ¡Hola! Bienvenido
-    </div>
-    <div class="wrapper__productos" id="productosGrid">
-        
+        Bienvenido Administrador
     </div>
 
+    <div class="wrapper__admin">
+        <form action="/add-product" method="POST" class="admin__form--addproduct">
+            <h2>Agregar Nuevo Producto</h2>
+            
+
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej: Pan Integral" required>
+            </div>
+            
+
+            <div class="form-group">
+                <label for="precio">Precio (MXN):</label>
+                <input type="number" id="precio" name="precio" step="0.01" placeholder="Ej: 25.50" required>
+            </div>
+            
+
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock:</label>
+                <input type="number" id="stock" name="stock" min="0" placeholder="Ej: 100" required>
+            </div>
+            
+
+            <div class="form-group">
+                <label for="imagen">Subir Imagen:</label>
+                <input type="file" id="imagen" name="imagen" accept="image/*" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" rows="4" placeholder="Ej: Pan integral con semillas de girasol, ideal para una dieta balanceada." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Agregar Producto</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="wrapper__admin">
+        <form action="/edit-product" method="POST" class="admin__form--editproduct">
+            <h2>Editar o Eliminar Producto</h2>
+            
+            <!-- Selector de productos -->
+            <div class="form-group">
+                <label for="selectProducto">Seleccionar Producto:</label>
+                <select id="selectProducto" name="selectProducto" onchange="cargarProducto()" required>
+                    <option value="" disabled selected>Seleccione un producto</option>
+                    <!-- Aquí se llenan las opciones dinámicamente con productos de la base de datos -->
+                    <option value="1">Pan Integral</option>
+                    <option value="2">Pan de Avena</option>
+                    <option value="3">Pan de Centeno</option>
+                </select>
+            </div>
+            
+            <!-- ID oculto del producto -->
+            <input type="hidden" id="id_producto" name="id_producto">
+    
+            <!-- Nombre del producto -->
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+            </div>
+            
+            <!-- Precio del producto -->
+            <div class="form-group">
+                <label for="precio">Precio (MXN):</label>
+                <input type="number" id="precio" name="precio" step="0.01" placeholder="Precio" required>
+            </div>
+            
+            <!-- Stock disponible -->
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock:</label>
+                <input type="number" id="stock" name="stock" min="0" placeholder="Cantidad" required>
+            </div>
+            
+            <!-- Imagen del producto -->
+            <div class="form-group">
+                <label for="imagen">Actualizar Imagen:</label>
+                <input type="file" id="imagen" name="imagen" accept="image/*">
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <button type="button" class="btn btn-danger" onclick="eliminarProducto()">Eliminar Producto</button>
+            </div>
+        </form>
+    </div>
 
     <div class="wrapper__imagecotorra">
         <img src="./images/imagencotorra.png" alt="">

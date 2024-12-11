@@ -176,12 +176,6 @@ nav h1 {
     user-select: none;
 }
 
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ffccb3b8c3485a0ba468e19727fcccd3f1342dc
-
 .wrapper__imagecotorra {
     height: 100px;
     width: 100%;
@@ -231,7 +225,7 @@ form h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100dvh;
+    height: calc(100dvh - 10dvh);
 }
 
 .wrapper__form--anotherinfo {
