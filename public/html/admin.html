@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desesperanza Online ADMIN</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
+        <ul class="nav__list">
+            <a href="/"><li class="nav__listitem">CATÁLOGO</li></a>
+            <a href="./inisesionperoahorasi.html"><li class="nav__listitem material-icons">person</li></a>
+        </ul>
+    </nav>
+    <div class="textmiado textmiado-admin">
+        ¡Bienvenido Administrador!
+    </div>
+
+    <div class="wrapper__admin">
+        <form id="addProductForm" class="admin__form" method="POST" enctype="multipart/form-data">
+            <h2>Agregar Nuevo Producto</h2>
+    
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej: Pan Integral" required class="form__input">
+            </div>
+    
+            <div class="form-group">
+                <label for="precio">Precio (MXN):</label>
+                <input type="number" id="precio" name="precio" step="0.01" placeholder="Ej: 25.50" required class="form__input">
+            </div>
+    
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock:</label>
+                <input type="number" id="stock" name="stock" min="0" placeholder="Ej: 100" required class="form__input">
+            </div>
+    
+            <div class="form-group file-upload-wrapper">
+                <label for="imagen" class="file-upload-label">
+                    <span class="material-icons">cloud_upload</span>
+                    Subir Imagen
+                </label>
+                <input type="file" id="imagenEdit" name="imagen" accept="image/*" required class="file-input" onchange="mostrarMensajeCarga()">
+                <span id="uploadSuccess" class="success-message" style="display: none;">Imagen cargada con éxito</span>
+            </div>
+    
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" rows="4" placeholder="Ej: Pan integral con semillas de girasol, ideal para una dieta balanceada." required class="form__input form__input--textarea"></textarea>
+            </div>
+    
+            <div class="form-group">
+                <button type="submit" class="form__button button_reg">Agregar Nuevo Producto</button>
+            </div>
+        </form>
+
+        <form action="/edit-product" method="POST" class="admin__form">
+            <h2>Editar Producto</h2>
+
+            <div class="form-group">
+                <label for="productoSelect">Seleccionar Producto:</label>
+                <select id="productoSelect" name="selectProducto" onchange="cargarDatosProducto()" required class="form__input">
+                    <option value="" disabled selected>Seleccione un producto</option>
+                </select>
+            </div>
+
+            <input type="hidden" id="id_producto_add" name="id_producto">
+
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombreEdit" name="nombre" placeholder="Nombre del producto" required class="form__input">
+            </div>
+
+            <div class="form-group">
+                <label for="precio">Precio (MXN):</label>
+                <input type="number" id="precioEdit" name="precio" step="0.01" placeholder="Precio" required class="form__input">
+            </div>
+
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock:</label>
+                <input type="number" id="stockEdit" name="stock" min="0" placeholder="Cantidad" required class="form__input">
+            </div>
+
+            <div class="form-group file-upload-wrapper">
+                <label for="imagen" class="file-upload-label">
+                    <span class="material-icons">cloud_upload</span>
+                    Actualizar Imagen
+                </label>
+                <input type="file" id="imagen" name="imagen" accept="image/*" required class="file-input" onchange="mostrarMensajeCarga()">
+                <span id="uploadSuccess" class="success-message" style="display: none;">Imagen cargada con éxito</span>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="form__button button_reg">Guardar cambios</button>
+            </div>
+        </form>
+        <form action="/delete-product" method="POST" class="admin__form">
+            <h2>Eliminar Producto</h2>
+
+            <div class="form-group">
+                <label for="productoSelect">Seleccionar Producto:</label>
+                <select id="productoSelect" name="selectProducto" onchange="cargarDatosProducto()" required class="form__input">
+                    <option value="" disabled selected>Seleccione un producto</option>
+                </select>
+            </div>
+
+            <input type="hidden" id="id_producto_edit" name="id_producto">
+
+
+
+            <div class="form-group">
+                <button type="button" class="form__button button__delete" onclick="eliminarProducto()">Eliminar Producto</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="wrapper__historial">
+        <h2>Aqui podra ver el historial de todos los pedidos</h2>
+        <div class="historial">
+                <div class="pedido">
+                    <p class="pedido__info pedido__usuario">Mbappe777</p>
+                    <p class="pedido__info pedido__fecha">12/12/2024</p>
+                    <p class="pedido__info pedido__productos">Productos: 1x Bolillo, 2x Pan de Muerto, 2x Rosca de Reyes</p>
+                    <input type="button" value="VER TICKET" class="pedido__button">
+                </div>
+        </div>
+    </div>
+
+    <div class="wrapper__imagecotorra">
+        <img src="../images/imagencotorra.png" alt="">
+    </div>
+    <div class="imagenfondo imagenfondo1">
+
+    </div>
+    <div class="wrapper__imagecotorra">
+        <img src="../images/imagencotorra.png" alt="">
+    </div>
+    <div class="imagenfondo imagenfondo2">
+        
+    </div>
+    <footer>
+        <div class="iconsrow">
+            <span class="button__ordenar--img123 material-icons material-symbols-outlined ">elderly_woman</span>
+        </div>
+    </footer>
+    <script src="../js/admin_js.js" defer></script>
+    <script>
+        function mostrarMensajeCarga() {
+            const mensaje = document.getElementById("uploadSuccess");
+            mensaje.style.display = "block";
+        }
+    </script>
+</body>
+</html>
