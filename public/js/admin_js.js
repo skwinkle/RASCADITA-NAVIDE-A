@@ -1,127 +1,90 @@
-// Agregar Producto (Formulario Agregar)
-document.getElementById('addProductForm')?.addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-    try {
-        const response = await fetch('/add-product', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-        if (response.ok) {
-            alert('Producto agregado con éxito!');
-            document.getElementById('addProductForm')?.reset();
-            await actualizarProductos();
-        } else {
-            alert('Error al agregar el producto: ' + result.message);
-        }
-    } catch (error) {
-        alert('Error en la solicitud: ' + error.message);
-    }
-});
+// Escuchar el evento submit del formulario
+const form = document.getElementById("loginForm");
 
-async function actualizarProductos() {
-    const select = document.getElementById('productoSelect');
-    if (!select) return;
+form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Evita que se envíe el formulario de forma predeterminada
 
-    select.innerHTML = '';
-    const defaultOption = document.createElement('option');
-    defaultOption.text = "Seleccione un producto";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    select.appendChild(defaultOption);
+    // Obtener los valores del formulario
+    const correo = document.getElementById("correo").value.trim();
+    const contraseña = document.getElementById("password").value;
 
-    try {
-        const response = await fetch('/productos');
-        const productos = await response.json();
-        productos.forEach(producto => {
-            const option = document.createElement('option');
-            option.value = producto.id_producto;
-            option.textContent = producto.nombre;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        alert('Error al cargar productos: ' + error.message);
-    }
-}
-
-function cargarDatosProducto() {
-    const productoId = document.getElementById('productoSelect')?.value;
-    if (productoId) {
-        fetch(`/productos/${productoId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la solicitud. Código de respuesta: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('nombreEdit')?.value = data.nombre;
-                document.getElementById('precioEdit')?.value = data.precio;
-                document.getElementById('stockEdit')?.value = data.stock;
-                document.getElementById('id_producto')?.value = data.id_producto;
-            })
-            .catch(error => alert('Error al cargar el producto: ' + error.message));
-    }
-}
-
-const guardarButton = document.querySelector('.button_reg');
-guardarButton?.addEventListener('click', async function(event) {
-    event.preventDefault();
-    const productoId = document.getElementById('id_producto')?.value;
-    const nombre = document.getElementById('nombreEdit')?.value;
-    const precio = document.getElementById('precioEdit')?.value;
-    const stock = document.getElementById('stockEdit')?.value;
-    const imagen = document.getElementById('imagenEdit')?.files[0];
-
-    const formData = new FormData();
-    formData.append('nombre', nombre);
-    formData.append('precio', precio);
-    formData.append('stock', stock);
-    formData.append('id_producto', productoId);
-    if (imagen) formData.append('imagen', imagen);
-
-    try {
-        const response = await fetch(`/actualizar-producto/${productoId}`, {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-        if (response.ok) {
-            alert('Producto actualizado con éxito!');
-            await actualizarProductos();
-        } else {
-            alert('Error al actualizar el producto: ' + result.message);
-        }
-    } catch (error) {
-        alert('Error en la solicitud: ' + error.message);
-    }
-});
-
-function eliminarProducto() {
-    const productoId = document.getElementById('id_producto')?.value;
-    if (!productoId) {
-        alert('Por favor, selecciona un producto primero.');
+    // Validar campos
+    if (!validarCorreo(correo)) {
+        alert("El correo no es válido. Asegúrate de que tenga un formato correcto.");
         return;
     }
-    if (confirm('¿Estás seguro de eliminar este producto?')) {
-        fetch(`/eliminar-producto/${productoId}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Producto eliminado exitosamente.');
-                    actualizarProductos();
-                } else {
-                    alert('Error al eliminar el producto: ' + data.message);
-                }
-            })
-            .catch(error => alert('Error en la eliminación: ' + error.message));
+
+    if (!validarContraseña(contraseña)) {
+        alert("La contraseña no cumple con los requisitos: entre 5 y 10 caracteres, sin espacios dobles ni caracteres inválidos.");
+        return;
     }
+
+    // Preparar datos para enviar al servidor
+    fetch('/iniciar-sesion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correo, contraseña }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.redirect) {
+            // Redirigir según el rol del usuario
+            window.location.href = data.redirect;
+        } else {
+            // Mostrar mensaje de error del servidor
+            alert(data.message || 'Error al iniciar sesión.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al realizar la solicitud:', error);
+        alert('Ocurrió un error al conectar con el servidor.');
+    });
+});
+
+// Función para validar el formato del correo electrónico
+function validarCorreo(correo) {
+    const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato estándar de correo
+    return correoRegex.test(correo);
 }
 
-window.addEventListener('load', actualizarProductos);
+// Función para validar la contraseña
+function validarContraseña(contraseña) {
+    if (contraseña.length < 5 || contraseña.length > 10) {
+        return false; // Longitud no permitida
+    }
 
-function mostrarMensajeCarga() {
-    const mensaje = document.getElementById("uploadSuccess");
-    if (mensaje) mensaje.style.display = "block";
+    if (/\s{2,}/.test(contraseña)) {
+        return false; // No permite espacios dobles
+    }
+
+    if (/['";=]/.test(contraseña)) {
+        return false; // Evita caracteres que puedan ser usados para inyecciones SQL
+    }
+
+    return true;
 }
+
+// Mensajes adicionales para guiar al usuario sobre errores comunes
+document.addEventListener("DOMContentLoaded", () => {
+    form.addEventListener("input", (event) => {
+        const target = event.target;
+
+        if (target.id === "correo") {
+            if (!validarCorreo(target.value)) {
+                target.setCustomValidity("Introduce un correo válido, como usuario@ejemplo.com");
+            } else {
+                target.setCustomValidity("");
+            }
+        }
+
+        if (target.id === "password") {
+            if (!validarContraseña(target.value)) {
+                target.setCustomValidity("La contraseña debe tener entre 5 y 10 caracteres, sin espacios dobles ni caracteres inválidos.");
+            } else {
+                target.setCustomValidity("");
+            }
+        }
+    });
+});

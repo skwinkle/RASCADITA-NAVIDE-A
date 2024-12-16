@@ -24,7 +24,7 @@
     </div>
 
     <div class="wrapper__admin">
-        <form id="addProductForm" class="admin__form" method="POST" enctype="multipart/form-data">
+        <form id="addProductForm" class="admin__form" enctype="multipart/form-data">
             <h2>Agregar Nuevo Producto</h2>
     
             <div class="form-group">
@@ -47,7 +47,7 @@
                     <span class="material-icons">cloud_upload</span>
                     Subir Imagen
                 </label>
-                <input type="file" id="imagenEdit" name="imagen" accept="image/*" required class="file-input" onchange="mostrarMensajeCarga()">
+                <input type="file" id="imagen" name="imagen" accept="image/*" required class="file-input" onchange="mostrarMensajeCarga()">
                 <span id="uploadSuccess" class="success-message" style="display: none;">Imagen cargada con éxito</span>
             </div>
     
@@ -61,7 +61,7 @@
             </div>
         </form>
 
-        <form action="/edit-product" method="POST" class="admin__form">
+        <form action="/edit-product" class="admin__form">
             <h2>Editar Producto</h2>
 
             <div class="form-group">
@@ -93,20 +93,20 @@
                     <span class="material-icons">cloud_upload</span>
                     Actualizar Imagen
                 </label>
-                <input type="file" id="imagen" name="imagen" accept="image/*" required class="file-input" onchange="mostrarMensajeCarga()">
+                <input type="file" id="imagenEdit" name="imagen" accept="image/*" class="file-input" onchange="mostrarMensajeCarga()">
                 <span id="uploadSuccess" class="success-message" style="display: none;">Imagen cargada con éxito</span>
             </div>
 
             <div class="form-group">
-                <button type="button" class="form__button button_reg">Guardar cambios</button>
+                <button type="button" class="form__button button_reg" onclick="actualizarProducto()">Guardar cambios</button>
             </div>
         </form>
-        <form action="/delete-product" method="POST" class="admin__form">
+        <form action="/delete-product" class="admin__form">
             <h2>Eliminar Producto</h2>
 
             <div class="form-group">
                 <label for="productoSelect">Seleccionar Producto:</label>
-                <select id="productoSelect" name="selectProducto" onchange="cargarDatosProducto()" required class="form__input">
+                <select id="productoSelectEliminar" name="selectProductoEliminar" required class="form__input">
                     <option value="" disabled selected>Seleccione un producto</option>
                 </select>
             </div>

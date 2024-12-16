@@ -78,7 +78,7 @@ nav h1 {
 }
 
 .image__container {
-    background-image: url("./images/fentanilo.jpg"); 
+    background-image: url("../images/fentanilo.jpg"); 
     background-size: cover; 
     background-position: center; 
     width: 100%;
@@ -429,6 +429,43 @@ label {
     overflow: hidden;
 }
 
+/* Estilos del Modal */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000000; /* Enfrente de otros elementos */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4); /* Fondo oscuro */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    height: fit-content;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 .footer__img .footer__image{
     width: clamp(100px,100%,100%);
 }
@@ -441,9 +478,34 @@ label {
     background-image: url(../images/lol.jpg);
 }
 
+.wrapper__modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper__modal.active {
+    display: flex;
+}
+
+.modal__pagar {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
 .wrappercontent {
     display: grid; 
-    grid-template-columns: repeat(5, 1fr); 
+    grid-template-columns: repeat(6, 1fr); 
     width: clamp(100px,100%,100%);
     gap: 20px; 
     padding: 20px; 
@@ -769,7 +831,7 @@ label {
     margin-bottom: 1vh;
 }
 
-.wrapper__carrito{
+.wrapper__carrito {
     height: 90dvh;
     width: 100dvw;
     background-color: #ddd;
@@ -777,54 +839,57 @@ label {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
-.carrito{
-    height: 80%;
+.carrito {
+    max-height: 80%;  /* Limita la altura para evitar desbordamientos */
     width: 70%;
     background-color: rgb(194, 214, 245);
     border-radius: 30px;
     margin: 2vh 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-between;  /* Esto asegura que el botón quede al fondo */
     overflow-y: auto;
     overflow-x: auto;
 }
 
-.producto{
+.producto {
     display: flex;
     justify-content: space-around;
     align-items: center;
     background-color: #224488;
     color: rgb(194, 214, 245);
     border-radius: 40px;
-    font-size: clamp(1.5rem,1vw,2vw);
-    margin: 5vh 10vh;
+    font-size: clamp(1.5rem, 1vw, 2vw);
+    margin: 2vh 2vh;  /* Márgenes reducidos */
 }
 
-.producto__img{
-    width: 5vw; 
-    height: auto; 
-    object-fit: cover; 
-    aspect-ratio: 3 / 4; 
-    display: block; 
-    border-radius: 5px; 
+.producto__img {
+    width: 5vw;
+    height: auto;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+    display: block;
+    border-radius: 5px;
     margin-top: 1.5vh 0;
 }
 
-.btn__carrito{
+.btn__carrito {
     width: 100%;
-    margin-top: auto;
+    margin-top: auto;  
     border: none;
     border-bottom-right-radius: 30px;
     border-bottom-left-radius: 30px;
     padding: 2vh;
     font-family: 'Montserrat';
-    font-size: clamp(1.5rem,1vw,2vw);
+    font-size: clamp(1.5rem, 1vw, 2vw);
     transition: background-color 0.5s ease, color 0.5s ease;
     letter-spacing: 1.2vw;
 }
+
 
 .profile__btn{
     width: 50%;
@@ -915,6 +980,47 @@ label {
     align-items: center;
     width: 50%;
 }
+
+/* Modal de Modificar Datos */
+.wrapper__modal {
+    display: none; /* Inicialmente oculto */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrado absoluto */
+    width: 50%;
+    max-width: 500px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.wrapper__modal .modal-content {
+    padding: 10px;
+}
+
+.wrapper__modal .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Fondo del modal */
+.modal-overlay {
+    display: none; /* Inicialmente oculto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
 
 
 /** Animacion Scroll */

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagar</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="../images/faviconw.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -16,29 +16,26 @@
         <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
         <ul class="nav__list">
             <a href="/"><li class="nav__listitem">CATÁLOGO</li></a>
-            <a href="./inisesionperoahorasi.html"><li class="nav__listitem material-icons">person</li></a>
+            <a href="inisesionperoahorasi.html"><li class="nav__listitem material-icons">person</li></a>
         </ul>
     </nav>
     <div class="wrapper__carrito">
         <h2>¿Listo para disfrutar de un rico pan?</h2>
         <div class="carrito">
-            <div class="producto">
-                <img src="./images/bolillos.webp" alt="" class="producto__img">
-                <div class="producto__name">Concha</div>
-                <div class="prodcuto__precio">$10.00</div>
-                <div class="producto__cantidad">Cantidad: 2</div>
-            </div>
-            <input type="button" class="btn__carrito" value="PAGAR">
+
+            <input type="button" class="btn__carrito pagar" value="PAGAR">
         </div>
     </div>
-    <div class="wrapper__modal">
-        <div class="modal__pagar">
-            <h2>Confirmar compra</h2>
-            <p>Fondos restantes: </p>
-            <p><a href="#" class="modal__addfondos">¿Desea agregar más fondos?</a></p>
-            <input type="button" class="btn__carrito" value="PAGAR">
-        </div>
+<!-- Modal para confirmar pago -->
+<div class="wrapper__modal" style="display: none;">
+    <div class="modal__pagar">
+        <h2>Confirmar compra</h2>
+        <p>Fondos restantes: <span id="fondosRestantes">0</span></p> <!-- Mostrar fondos -->
+        <p><a href="agregarfondos.html" class="modal__addfondos">¿Desea agregar más fondos?</a></p>
+        <input type="button" class="btn__carrito confirmarpago" value="PAGAR">
     </div>
+</div>
+
 
     <footer>
         <div class="iconsrow">
@@ -137,5 +134,27 @@
             </div>
         </div>
     </footer>
+    <script src="../js/carrito_js.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    // Agregar evento al botón PAGAR
+    const pagarBtn = document.querySelector('.btn__carrito.pagar');
+    const modalWrapper = document.querySelector('.wrapper__modal');
+    const confirmPagoBtn = document.querySelector('.btn__carrito.confirmarpago');
+
+    // Mostrar el modal cuando se haga clic en PAGAR
+    pagarBtn.addEventListener('click', () => {
+        modalWrapper.style.display = 'flex';  // Mostrar el modal
+    });
+
+    // Cerrar el modal cuando se haga clic fuera de él
+    modalWrapper.addEventListener('click', (e) => {
+        if (e.target === modalWrapper) {
+            modalWrapper.style.display = 'none';  // Ocultar el modal si se hace clic fuera
+        }
+    });
+});
+
+    </script>
 </body>
 </html>

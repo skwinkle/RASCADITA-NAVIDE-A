@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="app.js" defer></script>
     <title>Desperanza Online</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <link rel="icon" href="./images/faviconw.jpg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,13 +15,13 @@
     <nav class="nav">
         <a href="index.html"><h1 class="nav__title">DESESPERANZA</h1></a>
         <ul class="nav__list">
-            <a href="#"><li class="nav__listitem">CATÁLOGO</li></a>
-            <a href="datos.html"><li class="nav__listitem material-icons">person</li></a>
+            <a href="catalogo.html"><li class="nav__listitem">CATÁLOGO</li></a>
+            <a href="inisesionperoahorasi.html"><li class="nav__listitem material-icons">person</li></a>
         </ul>
     </nav>
     <div class="wrapper__content">
         <div class="wrapper__form">
-            <form action="/iniciarUsuario" method="post">
+            <form action="/iniciarUsuario">
                 <h1>INICIAR SESIÓN</h1>
                 <label for="correo"> Correo: </label>
                 <input type="email" name="gmail" id="correo" class="form__input" maxlength="50" required>
@@ -122,17 +121,22 @@
                     <li>Privacidad Facebook</li>
                 </ul>
             </div>
+            <ul class="footer__list">
+                <li>ADMINISTRADOR</li>
+                <li><a href="iniciosesion.html">INICIO SESIÓN</a></li>
+            </ul>
             <div class="footer__redes">
                 <h3>SIGUENOS</h3>
                 <div class="footer__redes__iconos">
-                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="./images/feisbu.png" alt="" class="logomiado"></span>
-                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="./images/tuiter.webp" alt="" class="logomiado"></span>
-                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="./images/ig.png" alt="" class="logomiado"></span>
-                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="./images/tuiktok.png" alt="" class="logomiado"></span>
+                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="../images/feisbu.png" alt="" class="logomiado"></span>
+                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="../images/tuiter.webp" alt="" class="logomiado"></span>
+                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="../images/ig.png" alt="" class="logomiado"></span>
+                    <span class="button__ordenar--img material-icons material-symbols-outlined"><img src="../images/tuiktok.png" alt="" class="logomiado"></span>
                 </div>
             </div>
         </div>
     </footer>
-    <script src="validacionesIN.js"></script>
+    <script src="../validacionesIN.js"></script>
+    <script src="../js/iniciosesion.js"></script>
 </body>
 </html>
