@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 </head>
 <body>
     <nav class="nav">
@@ -22,7 +24,22 @@
     <div class="wrapper__carrito">
         <h2>¿Listo para disfrutar de un rico pan?</h2>
         <div class="carrito">
-
+            <div class="carrito__producto">
+                <img src="../images/1734076857220.jpg" alt="" class="carrito__producto--img">
+                <div class="carrito__producto--content">
+                    <h2 class="producto--content Nombre">Bolillo Clásico</h2>
+                    <p class="producto--content stock">Stock: 666</p>
+                    <h2 class="producto--content precio">$20.00</h2>
+                </div>
+                <div class="carrito__producto--content2">
+                    <div class="carrito--buttons">
+                        <input type="button" value="-" class="producto__btn producto--delete">
+                        <input type="number" class="producto--cant" value="1" placeholder="10">
+                        <input type="button" value="+" class="producto__btn producto--add">
+                    </div>
+                    <input type="button" value="Eliminar" class="profile__btn form__button button__delete">
+                </div>
+            </div>            
             <input type="button" class="btn__carrito pagar" value="PAGAR">
         </div>
     </div>

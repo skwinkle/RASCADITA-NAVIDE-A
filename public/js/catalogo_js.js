@@ -1,125 +1,195 @@
-function obtenerCatalogo() {
-    fetch("/catalogo")
-        .then(response => response.json())
-        .then(data => {
-            mostrarProductos(data);
-        })
-        .catch(error => {
-            console.error("Error al obtener el catálogo:", error);
-        });
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("loginModal");
+    const cerrarSesionBtn = document.querySelector(".button__delete");
+    const modificarDatosBtn = document.querySelector(".profile__btn");
+    const form = document.querySelector("form");
+    const gmailInput = document.getElementById("correoLogin");
+    const passwordInput = document.getElementById("contrasenaLogin");
 
-function mostrarProductos(productos) {
-    const catalogo = document.getElementById("catalogo");
-    productos.forEach(producto => {
-        const precio = parseFloat(producto.precio);
-        if (!isNaN(precio)) {
-            const precioFormateado = precio.toFixed(2);
+    const getUserId = () => {
+        const userId = localStorage.getItem("userId");
+        console.log("userId desde localStorage:", userId);
+        return userId;
+    };
 
-            const divProducto = document.createElement("div");
-            divProducto.classList.add("grid__item--producto");
-            divProducto.innerHTML = `
-                <img src="${producto.imagen}" alt="${producto.nombre}" class="grid__item--img">
-                <div class="grid__item--content">
-                    <div class="content--name">
-                        ${producto.nombre} $${precioFormateado}
-                    </div>
-                    <button class="form__button agregarAlCarritoBtn" data-producto-id="${producto.id_producto}">Agregar al Carrito</button>
-                </div>
-            `;
-            catalogo.appendChild(divProducto);
+    const verificarSesion = () => {
+        const userId = getUserId();
+
+        if (userId) {
+            ocultarModalInicioSesion();
+            mostrarCatalogo();
         } else {
-            console.error(`El precio del producto ${producto.nombre} no es un número válido`);
+            mostrarModalInicioSesion();
+        }
+    };
+
+    const validarFormulario = () => {
+        const gmail = gmailInput?.value.trim();
+        const password = passwordInput?.value.trim();
+
+        if (gmail === '' || password === '') {
+            alert('Por favor, completa todos los campos.');
+            return false;
+        }
+
+        if (!/\S+@\S+\.\S+/.test(gmail)) {
+            alert('El correo no tiene un formato válido.');
+            return false;
+        }
+
+        if (password.length < 5 || password.length > 10) {
+            alert('La contraseña debe tener entre 5 y 10 caracteres.');
+            return false;
+        }
+
+        if (/\s/.test(password)) {
+            alert('La contraseña no puede contener espacios.');
+            return false;
+        }
+
+        return true;
+    };
+
+    form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (validarFormulario()) {
+            const email = gmailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            fetch("/iniciar-sesion", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ correo: email, contraseña: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Inicio de sesión exitoso.");
+                    localStorage.setItem("userId", data.userId);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error al iniciar sesión:", error);
+            });
         }
     });
 
-    document.querySelectorAll(".agregarAlCarritoBtn").forEach(btn => {
-        btn.addEventListener("click", function() {
-            const productoId = btn.getAttribute("data-producto-id");
-            agregarAlCarrito(productoId);
-        });
-    });
-}
+    const mostrarModalInicioSesion = () => {
+        if (modal) modal.style.display = "block";
+    };
 
-function agregarAlCarrito(productoId) {
-    fetch('/verificar-sesion')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.autenticado) {
-                mostrarModal();
-            } else {
-                fetch(`/productos/${productoId}`)
-                    .then(response => response.json())
-                    .then(producto => {
-                        if (producto) {
-                            const precio = producto.precio;
-                            const cantidad = 1;
-                            const subtotal = precio * cantidad;
+    const ocultarModalInicioSesion = () => {
+        if (modal) modal.style.display = "none";
+    };
 
+    const mostrarCatalogo = () => {
+        fetch("/catalogo")
+            .then(response => response.json())
+            .then(productos => {
+                const catalogo = document.getElementById("catalogo");
+                if (catalogo) {
+                    catalogo.innerHTML = ''; // Limpiar el catálogo
+    
+                    productos.forEach(producto => {
+                        // Validar que el producto tenga stock mayor a 0
+                        if (producto.stock > 0) {
+                            const precio = parseFloat(producto.precio);
+                            if (!isNaN(precio)) {
+                                const precioFormateado = precio.toFixed(2);
+                                const divProducto = document.createElement("div");
+                                divProducto.classList.add("grid__item--producto");
+                                divProducto.innerHTML = `
+                                    <img src="${producto.imagen}" alt="${producto.nombre}" class="grid__item--img">
+                                    <div class="grid__item--content">
+                                        <div class="content--name">
+                                            ${producto.nombre} $${precioFormateado}
+                                        </div>
+                                        <button class="form__button agregarAlCarritoBtn" data-producto-id="${producto.id_producto}">
+                                            Agregar al Carrito
+                                        </button>
+                                    </div>
+                                `;
+                                catalogo.appendChild(divProducto);
+                            } else {
+                                console.error(`El precio del producto ${producto.nombre} no es un número válido`);
+                            }
+                        }
+                    });
+    
+                    // Manejar eventos para los botones "Agregar al Carrito"
+                    const agregarAlCarritoBtns = document.querySelectorAll(".agregarAlCarritoBtn");
+                    agregarAlCarritoBtns.forEach(btn => {
+                        btn.addEventListener("click", (event) => {
+                            const productoId = event.target.getAttribute("data-producto-id");
+                            const userId = getUserId();
+    
+                            if (!userId) {
+                                alert("Debes iniciar sesión para agregar productos al carrito.");
+                                mostrarModalInicioSesion();
+                                return;
+                            }
+    
                             fetch("/agregar-al-carrito", {
-                                method: 'POST',
+                                method: "POST",
                                 headers: {
-                                    'Content-Type': 'application/json',
+                                    "Content-Type": "application/json",
                                 },
-                                body: JSON.stringify({ productoId, cantidad, subtotal })
+                                body: JSON.stringify({ productoId, userId })
                             })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    console.log("Producto agregado al carrito");
+                                    alert("Producto agregado al carrito.");
                                 } else {
-                                    console.error("Error al agregar el producto al carrito");
+                                    alert(data.message);
                                 }
                             })
                             .catch(error => {
-                                console.error("Error al agregar el producto al carrito:", error);
+                                console.error("Error al agregar al carrito:", error);
                             });
-                        } else {
-                            console.error("Producto no encontrado");
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al obtener el precio del producto:', error);
+                        });
                     });
-            }
-        })
-        .catch(error => {
-            console.error('Error al verificar sesión:', error);
-        });
-}
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar el catálogo:", error);
+            });
+    };
+    
 
-function mostrarModal() {
-    document.getElementById("loginModal").style.display = "block";
-}
-
-function cerrarModal() {
-    document.getElementById("loginModal").style.display = "none";
-}
-
-document.getElementById("loginForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    const correo = document.getElementById("correoLogin").value;
-    const contrasena = document.getElementById("contrasenaLogin").value;
-
-    fetch('/iniciar-sesion', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ correo, contrasena })
-    })
-    .then(response => {
-        if (response.ok) {
-            cerrarModal();
-            location.reload();
-        } else {
-            document.getElementById("errorMessage").style.display = "block";
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById("errorMessage").style.display = "block";
+    cerrarSesionBtn?.addEventListener("click", () => {
+        localStorage.removeItem("userId");
+        location.reload();
     });
-});
 
-obtenerCatalogo();
+    modificarDatosBtn?.addEventListener("click", () => {
+        if (modal) {
+            modal.style.display = "block";
+        }
+    });
+
+    const idUsuario = getUserId();
+    if (idUsuario) {
+        mostrarCatalogo();
+        ocultarModalInicioSesion();
+    }
+
+    const closeModal = document.querySelector("#closeModal");
+    closeModal?.addEventListener("click", () => {
+        if (modal) modal.style.display = "none";
+    });
+
+    const modalOverlay = document.querySelector(".modal-overlay");
+    modalOverlay?.addEventListener("click", () => {
+        if (modal) modal.style.display = "none";
+        modalOverlay.style.display = "none";
+    });
+
+    verificarSesion();
+});

@@ -1,90 +1,101 @@
-// Escuchar el evento submit del formulario
-const form = document.getElementById("loginForm");
+document.addEventListener('DOMContentLoaded', () => {
+    const productosContainer = document.getElementById('productos-container');
+    const historialContainer = document.getElementById('historial-container');
 
-form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Evita que se envíe el formulario de forma predeterminada
+    const obtenerProductos = () => {
+        fetch('/productos')
+            .then(res => res.json())
+            .then(productos => {
+                productosContainer.innerHTML = '';
+                productos.forEach(producto => {
+                    const productoElement = document.createElement('div');
+                    productoElement.classList.add('producto');
+                    productoElement.innerHTML = `
+                        <h3>${producto.nombre}</h3>
+                        <p>Precio: $${producto.precio}</p>
+                        <p>Stock: ${producto.stock}</p>
+                        <button class="eliminar-producto" data-id="${producto.id_producto}">Eliminar</button>
+                        <button class="editar-producto" data-id="${producto.id_producto}">Editar</button>
+                    `;
+                    productosContainer.appendChild(productoElement);
+                });
+            })
+            .catch(err => console.error('Error al obtener productos:', err));
+    };
 
-    // Obtener los valores del formulario
-    const correo = document.getElementById("correo").value.trim();
-    const contraseña = document.getElementById("password").value;
+    const obtenerHistorial = () => {
+        fetch('/api/historial')
+            .then(res => res.json())
+            .then(historial => {
+                historialContainer.innerHTML = '';
+                historial.forEach(factura => {
+                    const facturaElement = document.createElement('div');
+                    facturaElement.classList.add('factura');
+                    facturaElement.innerHTML = `
+                        <h3>Factura ID: ${factura.id_factura}</h3>
+                        <p>Fecha: ${factura.fecha}</p>
+                        <p>Total: $${factura.total}</p>
+                        <h4>Productos:</h4>
+                        <ul>
+                            ${factura.productos.map(producto => `
+                                <li>${producto.nombre} - Cantidad: ${producto.cantidad} - Subtotal: $${producto.subtotal}</li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    historialContainer.appendChild(facturaElement);
+                });
+            })
+            .catch(err => console.error('Error al obtener historial:', err));
+    };
 
-    // Validar campos
-    if (!validarCorreo(correo)) {
-        alert("El correo no es válido. Asegúrate de que tenga un formato correcto.");
-        return;
-    }
+    const eliminarProducto = (id) => {
+        fetch(`/eliminar-producto/${id}`, {
+            method: 'DELETE'
+        })
+            .then(res => res.json())
+            .then(() => {
+                obtenerProductos();
+            })
+            .catch(err => console.error('Error al eliminar producto:', err));
+    };
 
-    if (!validarContraseña(contraseña)) {
-        alert("La contraseña no cumple con los requisitos: entre 5 y 10 caracteres, sin espacios dobles ni caracteres inválidos.");
-        return;
-    }
+    const editarProducto = (id) => {
+        const nombre = prompt('Nuevo nombre del producto');
+        const precio = prompt('Nuevo precio del producto');
+        const stock = prompt('Nuevo stock del producto');
+        const imagen = prompt('Nueva imagen del producto (opcional)');
 
-    // Preparar datos para enviar al servidor
-    fetch('/iniciar-sesion', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ correo, contraseña }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.redirect) {
-            // Redirigir según el rol del usuario
-            window.location.href = data.redirect;
-        } else {
-            // Mostrar mensaje de error del servidor
-            alert(data.message || 'Error al iniciar sesión.');
+        if (nombre && precio && stock) {
+            fetch(`/actualizar-producto/${id}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    nombre,
+                    precio,
+                    stock,
+                    imagen
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(() => {
+                    obtenerProductos();
+                })
+                .catch(err => console.error('Error al editar producto:', err));
         }
-    })
-    .catch(error => {
-        console.error('Error al realizar la solicitud:', error);
-        alert('Ocurrió un error al conectar con el servidor.');
+    };
+
+    productosContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('eliminar-producto')) {
+            const id = e.target.getAttribute('data-id');
+            eliminarProducto(id);
+        } else if (e.target.classList.contains('editar-producto')) {
+            const id = e.target.getAttribute('data-id');
+            editarProducto(id);
+        }
     });
-});
 
-// Función para validar el formato del correo electrónico
-function validarCorreo(correo) {
-    const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato estándar de correo
-    return correoRegex.test(correo);
-}
-
-// Función para validar la contraseña
-function validarContraseña(contraseña) {
-    if (contraseña.length < 5 || contraseña.length > 10) {
-        return false; // Longitud no permitida
-    }
-
-    if (/\s{2,}/.test(contraseña)) {
-        return false; // No permite espacios dobles
-    }
-
-    if (/['";=]/.test(contraseña)) {
-        return false; // Evita caracteres que puedan ser usados para inyecciones SQL
-    }
-
-    return true;
-}
-
-// Mensajes adicionales para guiar al usuario sobre errores comunes
-document.addEventListener("DOMContentLoaded", () => {
-    form.addEventListener("input", (event) => {
-        const target = event.target;
-
-        if (target.id === "correo") {
-            if (!validarCorreo(target.value)) {
-                target.setCustomValidity("Introduce un correo válido, como usuario@ejemplo.com");
-            } else {
-                target.setCustomValidity("");
-            }
-        }
-
-        if (target.id === "password") {
-            if (!validarContraseña(target.value)) {
-                target.setCustomValidity("La contraseña debe tener entre 5 y 10 caracteres, sin espacios dobles ni caracteres inválidos.");
-            } else {
-                target.setCustomValidity("");
-            }
-        }
-    });
+    obtenerProductos();
+    obtenerHistorial();
 });

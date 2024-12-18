@@ -3,28 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const gmailInput = document.getElementById('correo');
     const passwordInput = document.getElementById('password');
 
-    const getCookie = (name) => {
-        const decodedCookies = decodeURIComponent(document.cookie);
-        const cookiesArray = decodedCookies.split(';');
-        for (let cookie of cookiesArray) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + "=")) {
-                return cookie.substring(name.length + 1);
-            }
-        }
-        return "";
-    };
-
     const verificarSesion = () => {
-        const sessionCookie = getCookie("session");
-        const userIdCookie = getCookie("userId");
-    
-        console.log("Cookies: ", document.cookie);  // Muestra todas las cookies
-        console.log("sessionCookie: ", sessionCookie);  // Muestra el valor de la cookie 'session'
-    
-        if (sessionCookie) {
+        const userId = localStorage.getItem("userId");  // Obtener userId desde localStorage
+        
+        console.log("userId:", userId);  // Muestra el userId en consola
+
+        if (userId) {
             console.log("Redirigiendo a perfil...");
-            window.location.href = "perfil.html";
+            window.location.href = "perfil.html";  // Redirige al perfil si hay userId
         }
     };
 
@@ -71,8 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.redirect) {
-                    window.location.href = data.redirect;
+                if (data.success) {
+                    // Si la respuesta es exitosa, guardamos el userId en localStorage
+                    localStorage.setItem("userId", data.userId);
+                    // Redirigimos a perfil
+                    window.location.href = "perfil.html";
                 } else {
                     alert(data.message || 'Error al iniciar sesión');
                 }
@@ -84,5 +73,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    verificarSesion();
+    verificarSesion();  // Verifica si ya hay sesión activa al cargar la página
 });

@@ -279,16 +279,81 @@ app.delete('/eliminar-producto/:id', (req, res) => {
     });
 });
 
+app.delete('/eliminar-del-carrito/:idProducto', (req, res) => {
+    const userId = req.cookies.userId; // Obtener el ID del usuario desde las cookies
+    const { idProducto } = req.params; // Obtener el ID del producto de los parámetros de la URL
+
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+
+    const query = `
+        DELETE FROM Carrito
+        WHERE id_usuario = ? AND id_producto = ?;
+    `;
+
+    db.query(query, [userId, idProducto], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Error al eliminar el producto del carrito" });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Producto no encontrado en el carrito" });
+        }
+
+        res.json({ success: true, message: "Producto eliminado del carrito" });
+    });
+});
+
+app.put('/actualizar-carrito/:idProducto', (req, res) => {
+    const userId = req.cookies.userId; // Obtener el ID del usuario desde las cookies
+    const { idProducto } = req.params; // Obtener el ID del producto de los parámetros de la URL
+    const { cantidad } = req.body; // Obtener la cantidad del cuerpo de la petición
+
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "No autenticado" });
+    }
+
+    if (cantidad < 1) {
+        return res.status(400).json({ success: false, message: "La cantidad debe ser al menos 1" });
+    }
+
+    const query = `
+        UPDATE Carrito
+        SET cantidad = ?
+        WHERE id_usuario = ? AND id_producto = ?;
+    `;
+
+    db.query(query, [cantidad, userId, idProducto], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Error al actualizar el carrito" });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Producto no encontrado en el carrito" });
+        }
+
+        res.json({ success: true, message: "Carrito actualizado correctamente" });
+    });
+});
+
+
+
 app.get('/catalogo', (req, res) => {
-    const query = 'SELECT id_producto, nombre, precio, stock, imagen FROM Productos';
+    const query = `
+        SELECT id_producto, nombre, precio, stock, imagen 
+        FROM Productos
+        WHERE stock > 0;
+    `;
+
     db.query(query, (err, results) => {
         if (err) {
-            console.error('Error al obtener productos:', err);
-            return res.status(500).json({ message: 'Error al obtener el catálogo.' });
+            return res.status(500).json({ success: false, message: "Error al obtener el catálogo" });
         }
         res.json(results);
     });
 });
+
 
 app.post('/iniciar-sesion', (req, res) => {
     const { correo, contraseña } = req.body;
@@ -297,7 +362,7 @@ app.post('/iniciar-sesion', (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
-    console.log('Correo recibido:', correo); // Registro del correo recibido
+    console.log('Correo recibido:', correo);
 
     const query = 'SELECT * FROM Usuarios WHERE correo = ?';
     db.query(query, [correo], (err, results) => {
@@ -312,19 +377,16 @@ app.post('/iniciar-sesion', (req, res) => {
         }
 
         const usuario = results[0];
-        console.log('Usuario encontrado:', usuario); // Mostrar el usuario encontrado
+        console.log('Usuario encontrado:', usuario);
 
         if (contraseña !== usuario.contraseña) {
-            console.log('Contraseña incorrecta'); // Registro si la contraseña no coincide
+            console.log('Contraseña incorrecta');
             return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
         }
 
         console.log('Inicio de sesión exitoso para el usuario:', usuario.id_usuario);
 
-        // Crear las cookies para la sesión y el ID de usuario
-        res.cookie('session', 'true', { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 }); // Cookie 'session' por 30 días
-        res.cookie('userId', usuario.id_usuario, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 }); // Cookie 'userId' por 30 días
-
+        // Enviar el userId en la respuesta, sin usar cookies
         // Redirigir según el rol del usuario
         if (usuario.rol === 'administrador') {
             return res.json({ success: true, userId: usuario.id_usuario, redirect: '/admin.html' });
@@ -333,6 +395,7 @@ app.post('/iniciar-sesion', (req, res) => {
         }
     });
 });
+
 
 
 app.get('/obtener-fondos/:userId', (req, res) => {
@@ -391,15 +454,14 @@ app.get('/verificar-sesion', (req, res) => {
 });
 
 app.post('/agregar-al-carrito', (req, res) => {
-    const { productoId } = req.body;
-    const id_usuario = req.session.id_usuario;
+    const { productoId, userId } = req.body;
 
-    if (!id_usuario) {
+    if (!userId) {
         return res.status(401).json({ message: 'Usuario no autenticado' });
     }
 
     const queryVerificar = 'SELECT * FROM Carrito WHERE id_usuario = ? AND id_producto = ?';
-    db.query(queryVerificar, [id_usuario, productoId], (err, results) => {
+    db.query(queryVerificar, [userId, productoId], (err, results) => {
         if (err) {
             console.error('Error al verificar el carrito:', err);
             return res.status(500).json({ message: 'Error al verificar el carrito' });
@@ -419,7 +481,7 @@ app.post('/agregar-al-carrito', (req, res) => {
                 const subtotal = precio * nuevaCantidad;
 
                 const queryActualizar = 'UPDATE Carrito SET cantidad = ?, subtotal = ? WHERE id_usuario = ? AND id_producto = ?';
-                db.query(queryActualizar, [nuevaCantidad, subtotal, id_usuario, productoId], (err) => {
+                db.query(queryActualizar, [nuevaCantidad, subtotal, userId, productoId], (err) => {
                     if (err) {
                         console.error('Error al actualizar el carrito:', err);
                         return res.status(500).json({ message: 'Error al actualizar el carrito' });
@@ -439,7 +501,7 @@ app.post('/agregar-al-carrito', (req, res) => {
                 const subtotal = precio * 1;
 
                 const queryAgregar = 'INSERT INTO Carrito (id_usuario, id_producto, cantidad, subtotal) VALUES (?, ?, ?, ?)';
-                db.query(queryAgregar, [id_usuario, productoId, 1, subtotal], (err) => {
+                db.query(queryAgregar, [userId, productoId, 1, subtotal], (err) => {
                     if (err) {
                         console.error('Error al agregar al carrito:', err);
                         return res.status(500).json({ message: 'Error al agregar al carrito' });
@@ -638,6 +700,45 @@ app.get('/api/facturas/:idFactura', (req, res) => {
                 total: factura.total,
                 productos: productos // Productos relacionados con la factura
             });
+        });
+    });
+});
+
+app.get('/api/historial', (req, res) => {
+    const query = 'SELECT * FROM Facturas';
+    
+    db.query(query, (err, facturas) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error al obtener el historial de facturas' });
+        }
+
+        const historialConProductos = [];
+
+        async.each(facturas, (factura, callback) => {
+            const productosQuery = `
+                SELECT p.nombre, df.cantidad, df.subtotal
+                FROM Detalle_Factura df
+                JOIN Productos p ON df.id_producto = p.id_producto
+                WHERE df.id_factura = ?`;
+
+            db.query(productosQuery, [factura.id_factura], (err, productos) => {
+                if (err) return callback(err);
+
+                historialConProductos.push({
+                    id_factura: factura.id_factura,
+                    fecha: factura.fecha,
+                    total: factura.total,
+                    productos: productos
+                });
+
+                callback();
+            });
+        }, (err) => {
+            if (err) {
+                return res.status(500).json({ message: 'Error al obtener productos del historial' });
+            }
+
+            res.json(historialConProductos);
         });
     });
 });

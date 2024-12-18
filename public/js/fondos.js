@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let userId = obtenerCookie('userId');
+    let userId = localStorage.getItem('userId');
     
-    console.log('Cookies:', document.cookie);
-    console.log('User ID desde la cookie:', userId);
+    console.log('User ID desde localStorage:', userId);
     
     if (!userId) {
         mostrarModalInicioSesion();
@@ -68,18 +67,6 @@ function agregarFondos(userId, cantidad) {
         });
 }
 
-function obtenerCookie(nombre) {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        cookie = cookie.trim();
-        const [key, value] = cookie.split('=');
-        if (key === nombre) {
-            return value;
-        }
-    }
-    return null;
-}
-
 function mostrarModalInicioSesion() {
     const modal = document.getElementById('modal');
     modal.style.display = 'block';
@@ -100,7 +87,7 @@ function mostrarModalInicioSesion() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.cookie = `userId=${data.userId}; path=/`;
+                    localStorage.setItem('userId', data.userId); // Guarda el userId en localStorage
                     modal.style.display = 'none';
                     obtenerFondos(data.userId);
                 } else {

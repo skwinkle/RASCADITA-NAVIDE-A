@@ -20,9 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.redirect) {
-                // Redirigir a perfil.html si el registro fue exitoso
-                window.location.href = data.redirect;
+            if (data.success) {
+                // Si el registro fue exitoso, guardamos el userId en localStorage
+                localStorage.setItem("userId", data.userId);
+
+                // Redirigir a perfil.html
+                window.location.href = "perfil.html";
             } else {
                 // Mostrar error si algo falla
                 alert(data.message || 'Error al registrar usuario');
