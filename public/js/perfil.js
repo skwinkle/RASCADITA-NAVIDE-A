@@ -10,150 +10,178 @@ document.addEventListener("DOMContentLoaded", () => {
     const gmailInput = document.getElementById("correo");
     const passwordInput = document.getElementById("password");
 
-    const cargarProductos = () => {
-        fetch('/productos')
-            .then(response => response.json())
-            .then(data => {
-                const selectProducto = document.getElementById("productoSelect");
-                const selectProductoEliminar = document.getElementById("productoSelectEliminar");
-                data.forEach(producto => {
-                    const option = document.createElement("option");
-                    option.value = producto.id_producto;
-                    option.textContent = producto.nombre;
-                    selectProducto.appendChild(option);
-                    
-                    const optionEliminar = document.createElement("option");
-                    optionEliminar.value = producto.id_producto;
-                    optionEliminar.textContent = producto.nombre;
-                    selectProductoEliminar.appendChild(optionEliminar);
-                });
-            })
-            .catch(error => console.error('Error al cargar productos:', error));
-    };
-
-    const cargarDatosProducto = () => {
-        const productoId = document.getElementById("productoSelect").value;
-        if (productoId) {
-            fetch(`/productos/${productoId}`)
-                .then(response => response.json())
-                .then(producto => {
-                    document.getElementById("nombreEdit").value = producto.nombre;
-                    document.getElementById("precioEdit").value = producto.precio;
-                    document.getElementById("stockEdit").value = producto.stock;
-                })
-                .catch(error => console.error('Error al cargar datos del producto:', error));
+    const verificarSesion = () => {
+        // Verificar sesión en localStorage
+        const session = localStorage.getItem("session");
+        const userId = localStorage.getItem("userId");
+        if (!session || !userId) {
+            console.log("No hay sesión activa");
         }
     };
 
-    const eliminarProducto = () => {
-        const productoId = document.getElementById("productoSelectEliminar").value;
-        if (productoId) {
-            fetch(`/eliminar-producto/${productoId}`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert('Producto eliminado con éxito');
-                    cargarProductos();
-                }
-            })
-            .catch(error => console.error('Error al eliminar el producto:', error));
+    const validarFormulario = () => {
+        const gmail = gmailInput.value.trim();
+        const password = passwordInput.value.trim();
+        if (gmail === '' || password === '') {
+            alert('Por favor, completa todos los campos.');
+            return false;
         }
+        if (!/\S+@\S+\.\S+/.test(gmail)) {
+            alert('El correo no tiene un formato válido.');
+            return false;
+        }
+        if (password.length < 5 || password.length > 10) {
+            alert('La contraseña debe tener entre 5 y 10 caracteres.');
+            return false;
+        }
+        if (/\s/.test(password)) {
+            alert('La contraseña no puede contener espacios.');
+            return false;
+        }
+        return true;
     };
 
-    const crearProducto = (event) => {
+    form.addEventListener("submit", (event) => {
         event.preventDefault();
-
-        const formData = new FormData(event.target);
-        fetch('/productos', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert('Producto creado con éxito');
-                cargarProductos();
-            } else {
-                alert('Error al crear el producto');
-            }
-        })
-        .catch(error => console.error('Error al crear producto:', error));
-    };
-
-    const actualizarProducto = () => {
-        const productoId = document.getElementById("productoSelect").value;
-        const nombre = document.getElementById("nombreEdit").value;
-        const precio = document.getElementById("precioEdit").value;
-        const stock = document.getElementById("stockEdit").value;
-
-        if (productoId && nombre && precio && stock) {
-            fetch(`/productos/${productoId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, precio, stock })
+        if (validarFormulario()) {
+            const email = gmailInput.value.trim();
+            const password = passwordInput.value.trim();
+            fetch("/iniciar-sesion", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ correo: email, contraseña: password })
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert('Producto actualizado con éxito');
-                    cargarProductos();
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error en la respuesta del servidor");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert("Inicio de sesión exitoso.");
+                    localStorage.setItem("session", "true");
+                    localStorage.setItem("userId", data.userId);
+                    location.reload();
+                } else {
+                    alert(data.message);
                 }
             })
-            .catch(error => console.error('Error al actualizar producto:', error));
+            .catch(error => {
+                console.error("Error al iniciar sesión:", error);
+            });
         }
+    });
+
+    const mostrarModalInicioSesion = () => {
+        if (modal) modal.style.display = "block";
     };
 
-    const mostrarHistorial = () => {
-        fetch('/historial')
-            .then(response => response.json())
-            .then(data => {
-                historial.innerHTML = '';
-                data.forEach(pedido => {
+    const ocultarModalInicioSesion = () => {
+        if (modal) modal.style.display = "none";
+    };
+
+    const mostrarPerfil = (idUsuario) => {
+        fetch(`/api/usuarios/${idUsuario}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("No se pudo cargar la información del usuario.");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.nombre_usuario && data.correo) {
+                    perfilNombre.textContent = `Nombre: ${data.nombre_usuario}`;
+                    perfilCorreo.textContent = `Correo: ${data.correo}`;
+                } else {
+                    perfilNombre.textContent = 'Nombre: No disponible';
+                    perfilCorreo.textContent = 'Correo: No disponible';
+                }
+                historial.innerHTML = "";
+                data.facturas.forEach((factura) => {
                     const pedidoDiv = document.createElement("div");
                     pedidoDiv.classList.add("pedido");
-                    const productos = pedido.productos.map(producto => producto.nombre).join(", ");
-                    const fecha = new Date(pedido.fecha).toLocaleDateString("es-ES");
-
+                    const productos = factura.productos.map(producto => producto.nombre).join(", ");
+                    const fecha = new Date(factura.fecha).toLocaleDateString("es-ES");
                     pedidoDiv.innerHTML = `
-                        <p class="pedido__info pedido__usuario">${pedido.usuario}</p>
+                        <p class="pedido__info pedido__usuario">${data.nombre_usuario}</p>
                         <p class="pedido__info pedido__fecha">${fecha}</p>
                         <p class="pedido__info pedido__productos">Productos: ${productos}</p>
-                        <input type="button" value="VER TICKET" class="pedido__button" data-id-pedido="${pedido.id}">
+                        <input type="button" value="VER TICKET" class="pedido__button" data-id-factura="${factura.id_factura}">
                     `;
                     historial.appendChild(pedidoDiv);
-
-                    const verTicketBtn = pedidoDiv.querySelector(".pedido__button");
-                    verTicketBtn.addEventListener("click", (e) => {
-                        const pedidoId = e.target.dataset.idPedido;
-                        fetch(`/facturas/${pedidoId}`)
-                            .then(response => response.json())
-                            .then(ticket => {
+                });
+                document.querySelectorAll(".pedido__button").forEach((btn) => {
+                    btn.addEventListener("click", (e) => {
+                        const idFactura = e.target.dataset.idFactura;
+                        fetch(`/api/facturas/${idFactura}`)
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error("No se pudo cargar el ticket.");
+                                }
+                                return response.json();
+                            })
+                            .then((ticket) => {
+                                if (!ticket || !ticket.negocio) {
+                                    console.error("Ticket no válido o incompleto", ticket);
+                                    return;
+                                }
                                 const ticketVentana = window.open("", "Ticket", "width=600,height=400");
                                 ticketVentana.document.write(`
                                     <h1>Ticket</h1>
-                                    <p>Usuario: ${ticket.usuario}</p>
-                                    <p>Fecha: ${new Date(ticket.fecha).toLocaleDateString("es-ES")}</p>
-                                    <p>Productos: ${ticket.productos.map(producto => `${producto.nombre}`).join(", ")}</p>
-                                    <p>Total: ${ticket.total}</p>
+                                    <p>Nombre del negocio: ${ticket.negocio}</p>
+                                    <p>Fecha de la Compra: ${new Date(ticket.fecha).toLocaleDateString("es-ES")}</p>
+                                    <p>Productos Comprados: ${ticket.productos.map(producto => `${producto.nombre}`).join(", ")}</p>
+                                    <p>Total a pagar: ${ticket.total}</p>
+                                    <p>Número de Venta: ${ticket.id_factura}</p>
                                 `);
                                 ticketVentana.document.close();
                             })
-                            .catch(error => console.error("Error al cargar el ticket:", error));
+                            .catch((error) => {
+                                console.error("Error al cargar el ticket:", error);
+                            });
                     });
                 });
             })
-            .catch(error => console.error("Error al cargar el historial:", error));
+            .catch((error) => {
+                console.error("Error al cargar el perfil del usuario:", error);
+            });
     };
 
-    cargarProductos();
-    mostrarHistorial();
+    const cerrarSesion = () => {
+        localStorage.removeItem("session");
+        localStorage.removeItem("userId");
+        location.reload();
+    };
 
-    document.getElementById("addProductForm").addEventListener("submit", crearProducto);
-    
-    document.getElementById("productoSelect").addEventListener("change", cargarDatosProducto);
-    document.querySelector(".button_reg").addEventListener("click", actualizarProducto);
+    cerrarSesionBtn.addEventListener("click", cerrarSesion);
 
-    document.querySelector(".button__delete").addEventListener("click", eliminarProducto);
+    modificarDatosBtn.addEventListener("click", () => {
+        if (modal) {
+            modal.style.display = "block";
+        }
+    });
+
+    const idUsuario = localStorage.getItem("userId");
+    if (idUsuario) {
+        mostrarPerfil(idUsuario);
+        ocultarModalInicioSesion();
+    }
+
+    const closeModal = document.querySelector("#closeModal");
+    if (closeModal) {
+        closeModal.addEventListener("click", () => {
+            if (modal) modal.style.display = "none";
+        });
+    }
+
+    const modalOverlay = document.querySelector(".modal-overlay");
+    if (modalOverlay) {
+        modalOverlay.addEventListener("click", () => {
+            if (modal) modal.style.display = "none";
+            modalOverlay.style.display = "none";
+        });
+    }
 });

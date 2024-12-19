@@ -1,16 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const carritoWrapper = document.querySelector('.carrito');
     const pagarBtn = document.querySelector('.btn__carrito.pagar');
     const modalWrapper = document.querySelector('.wrapper__modal');
+    const confirmPagoBtn = document.querySelector('.btn__carrito.confirmarpago');
     const userId = localStorage.getItem('userId');
-
     if (userId) {
         obtenerFondos(userId);
-        obtenerProductosRelacionados();
     } else {
         mostrarModalInicioSesion();
     }
-
     if (pagarBtn) {
         pagarBtn.addEventListener('click', () => {
             const fondosElement = document.querySelector('.fondos-restantes');
@@ -20,11 +17,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('No tienes fondos suficientes.');
                     return;
                 }
-                realizarPago(userId);
+                modalWrapper.style.display = 'flex';
+                const fondosModalElement = document.querySelector('.fondos-modal');
+                if (fondosModalElement) {
+                    fondosModalElement.textContent = `Fondos restantes: $${fondos.toFixed(2)}`;
+                }
             }
         });
     }
-
+    if (confirmPagoBtn) {
+        confirmPagoBtn.addEventListener('click', () => {
+            const fondosRestantesElement = document.querySelector('#fondosRestantes');
+            if (fondosRestantesElement) {
+                const fondosRestantes = parseFloat(fondosRestantesElement.textContent.replace('$', ''));
+                if (fondosRestantes <= 0) {
+                    alert('No tienes fondos suficientes.');
+                    return;
+                }
+                realizarPago(userId, fondosRestantes).then(success => {
+                    if (success) {
+                        modalWrapper.style.display = 'none';
+                        obtenerFondos(userId);
+                    }
+                });
+            }
+        });
+    }
     if (modalWrapper) {
         modalWrapper.addEventListener('click', (e) => {
             if (e.target === modalWrapper) {
@@ -32,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    obtenerProductosRelacionados();
 });
 
 function obtenerFondos(userId) {
@@ -39,26 +58,67 @@ function obtenerFondos(userId) {
         .then(response => response.json())
         .then(data => {
             if (data && data.fondos !== undefined) {
-                const fondosElement = document.querySelector('.fondos-restantes');
-                if (fondosElement) {
-                    fondosElement.textContent = `Fondos restantes: $${data.fondos.toFixed(2)}`;
+                const fondosRestantes = parseFloat(data.fondos);
+                const fondosRestantesElement = document.querySelector('#fondosRestantes');
+                if (fondosRestantesElement) {
+                    fondosRestantesElement.textContent = `$${fondosRestantes.toFixed(2)}`;
+                }
+                const fondosDisplayElement = document.querySelector('.fondos-restantes');
+                if (fondosDisplayElement) {
+                    fondosDisplayElement.textContent = `Fondos restantes: $${fondosRestantes.toFixed(2)}`;
                 }
             }
         })
         .catch(error => {
-            console.error('Error al obtener fondos:', error);
+            console.error('Error al obtener los fondos:', error);
         });
 }
 
+function realizarPago(userId, fondosRestantes) {
+    return fetch(`/realizar-pago/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fondosRestantes })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Pago realizado correctamente.');
+            return true;
+        } else {
+            alert('Error al realizar el pago: ' + data.message);
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error('Error al procesar el pago:', error);
+        return false;
+    });
+}
+
 function obtenerProductosRelacionados() {
-    fetch('/productos-relacionados')
-        .then(response => response.json())
-        .then(productos => {
-            mostrarProductosRelacionados(productos);
-        })
-        .catch(error => {
-            console.error('Error al obtener los productos relacionados:', error);
-        });
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        console.error('No se ha encontrado un userId en el localStorage');
+        return;
+    }
+
+    fetch(`/productos-relacionados/${userId}`, {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('No autorizado');
+        }
+        return response.json();
+    })
+    .then(productos => {
+        mostrarProductosRelacionados(productos);
+    })
+    .catch(error => {
+        console.error('Error al obtener productos relacionados:', error);
+    });
 }
 
 function mostrarProductosRelacionados(productos) {
@@ -98,73 +158,28 @@ function mostrarProductosRelacionados(productos) {
 }
 
 function agregarEventosProducto(divProducto, producto) {
-    const deleteBtn = divProducto.querySelector('.producto--delete');
-    const addBtn = divProducto.querySelector('.producto--add');
-    const cantInput = divProducto.querySelector('.producto--cant');
-    const eliminarBtn = divProducto.querySelector('.button__delete');
+    const btnDelete = divProducto.querySelector('.producto--delete');
+    const btnAdd = divProducto.querySelector('.producto--add');
+    const inputCantidad = divProducto.querySelector('.producto--cant');
+    const btnEliminar = divProducto.querySelector('.button__delete');
 
-    deleteBtn.addEventListener('click', () => {
-        let cantidadActual = parseInt(cantInput.value);
-        if (cantidadActual > 1) {
-            cantInput.value = cantidadActual - 1;
-            actualizarCarrito(producto.id_producto, cantInput.value);
+    btnDelete.addEventListener('click', () => {
+        let cantidad = parseInt(inputCantidad.value);
+        if (cantidad > 1) {
+            inputCantidad.value = cantidad - 1;
         }
     });
 
-    addBtn.addEventListener('click', () => {
-        let cantidadActual = parseInt(cantInput.value);
-        if (cantidadActual < producto.stock) {
-            cantInput.value = cantidadActual + 1;
-            actualizarCarrito(producto.id_producto, cantInput.value);
+    btnAdd.addEventListener('click', () => {
+        let cantidad = parseInt(inputCantidad.value);
+        if (cantidad < producto.stock) {
+            inputCantidad.value = cantidad + 1;
         }
     });
 
-    cantInput.addEventListener('change', () => {
-        let cantidadActual = parseInt(cantInput.value);
-        if (cantidadActual < 1) {
-            cantInput.value = 1;
-        } else if (cantidadActual > producto.stock) {
-            cantInput.value = producto.stock;
-        }
-        actualizarCarrito(producto.id_producto, cantInput.value);
+    btnEliminar.addEventListener('click', () => {
+        divProducto.remove();
     });
-
-    eliminarBtn.addEventListener('click', () => {
-        if (confirm(`¿Deseas eliminar "${producto.nombre}" del carrito?`)) {
-            eliminarProductoDelCarrito(producto.id_producto);
-            divProducto.remove();
-        }
-    });
-}
-
-function actualizarCarrito(idProducto, cantidad) {
-    fetch(`/actualizar-carrito/${idProducto}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cantidad })
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Error al actualizar el carrito');
-            }
-        })
-        .catch(error => {
-            console.error('Error al actualizar el carrito:', error);
-        });
-}
-
-function eliminarProductoDelCarrito(idProducto) {
-    fetch(`/eliminar-del-carrito/${idProducto}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Error al eliminar el producto del carrito');
-            }
-        })
-        .catch(error => {
-            console.error('Error al eliminar producto:', error);
-        });
 }
 
 function mostrarModalInicioSesion() {
@@ -178,43 +193,26 @@ function mostrarModalInicioSesion() {
             event.preventDefault();
             const correo = document.getElementById('correo').value;
             const password = document.getElementById('password').value;
-
             fetch('/iniciar-sesion', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ correo, password })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        localStorage.setItem('userId', data.userId);
-                        modal.style.display = 'none';
-                        obtenerFondos(data.userId);
-                    } else {
-                        alert('Credenciales incorrectas');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al iniciar sesión:', error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('userId', data.userId);
+                    modal.style.display = 'none';
+                    obtenerFondos(data.userId);
+                } else {
+                    alert('Credenciales incorrectas');
+                }
+            })
+            .catch(error => {
+                console.error('Error al iniciar sesión:', error);
+            });
         });
     }
-}
-
-function realizarPago(userId) {
-    fetch(`/realizar-pago/${userId}`, {
-        method: 'POST',
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Pago realizado correctamente');
-            // Redirigir a otra página o limpiar el carrito
-        } else {
-            alert('Error al procesar el pago');
-        }
-    })
-    .catch(error => {
-        console.error('Error al realizar el pago:', error);
-    });
 }

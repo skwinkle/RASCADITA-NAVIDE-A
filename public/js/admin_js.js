@@ -1,101 +1,122 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const productosContainer = document.getElementById('productos-container');
-    const historialContainer = document.getElementById('historial-container');
+function cargarProductos() {
+    fetch('/productos')
+        .then((response) => response.json())
+        .then((productos) => {
+            const selectEditar = document.getElementById('productoSelect');
+            const selectEliminar = document.getElementById('productoSelectEliminar');
 
-    const obtenerProductos = () => {
-        fetch('/productos')
-            .then(res => res.json())
-            .then(productos => {
-                productosContainer.innerHTML = '';
-                productos.forEach(producto => {
-                    const productoElement = document.createElement('div');
-                    productoElement.classList.add('producto');
-                    productoElement.innerHTML = `
-                        <h3>${producto.nombre}</h3>
-                        <p>Precio: $${producto.precio}</p>
-                        <p>Stock: ${producto.stock}</p>
-                        <button class="eliminar-producto" data-id="${producto.id_producto}">Eliminar</button>
-                        <button class="editar-producto" data-id="${producto.id_producto}">Editar</button>
-                    `;
-                    productosContainer.appendChild(productoElement);
-                });
-            })
-            .catch(err => console.error('Error al obtener productos:', err));
-    };
+            selectEditar.innerHTML = '<option value="" disabled selected>Seleccione un producto</option>';
+            selectEliminar.innerHTML = '<option value="" disabled selected>Seleccione un producto</option>';
 
-    const obtenerHistorial = () => {
-        fetch('/api/historial')
-            .then(res => res.json())
-            .then(historial => {
-                historialContainer.innerHTML = '';
-                historial.forEach(factura => {
-                    const facturaElement = document.createElement('div');
-                    facturaElement.classList.add('factura');
-                    facturaElement.innerHTML = `
-                        <h3>Factura ID: ${factura.id_factura}</h3>
-                        <p>Fecha: ${factura.fecha}</p>
-                        <p>Total: $${factura.total}</p>
-                        <h4>Productos:</h4>
-                        <ul>
-                            ${factura.productos.map(producto => `
-                                <li>${producto.nombre} - Cantidad: ${producto.cantidad} - Subtotal: $${producto.subtotal}</li>
-                            `).join('')}
-                        </ul>
-                    `;
-                    historialContainer.appendChild(facturaElement);
-                });
-            })
-            .catch(err => console.error('Error al obtener historial:', err));
-    };
-
-    const eliminarProducto = (id) => {
-        fetch(`/eliminar-producto/${id}`, {
-            method: 'DELETE'
+            productos.forEach((producto) => {
+                const option = document.createElement('option');
+                option.value = producto.id_producto;
+                option.textContent = producto.nombre;
+                selectEditar.appendChild(option.cloneNode(true));
+                selectEliminar.appendChild(option);
+            });
         })
-            .then(res => res.json())
-            .then(() => {
-                obtenerProductos();
-            })
-            .catch(err => console.error('Error al eliminar producto:', err));
-    };
+        .catch((error) => console.error(error));
+}
 
-    const editarProducto = (id) => {
-        const nombre = prompt('Nuevo nombre del producto');
-        const precio = prompt('Nuevo precio del producto');
-        const stock = prompt('Nuevo stock del producto');
-        const imagen = prompt('Nueva imagen del producto (opcional)');
+function cargarDatosProducto() {
+    const productoId = document.getElementById('productoSelect').value;
 
-        if (nombre && precio && stock) {
-            fetch(`/actualizar-producto/${id}`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    nombre,
-                    precio,
-                    stock,
-                    imagen
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(res => res.json())
-                .then(() => {
-                    obtenerProductos();
-                })
-                .catch(err => console.error('Error al editar producto:', err));
-        }
-    };
+    if (!productoId) return;
 
-    productosContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('eliminar-producto')) {
-            const id = e.target.getAttribute('data-id');
-            eliminarProducto(id);
-        } else if (e.target.classList.contains('editar-producto')) {
-            const id = e.target.getAttribute('data-id');
-            editarProducto(id);
-        }
-    });
+    fetch(`/productos/${productoId}`)
+        .then((response) => response.json())
+        .then((producto) => {
+            if (producto) {
+                document.getElementById('id_producto_add').value = producto.id_producto;
+                document.getElementById('nombreEdit').value = producto.nombre;
+                document.getElementById('precioEdit').value = producto.precio;
+                document.getElementById('stockEdit').value = producto.stock;
+            }
+        })
+        .catch((error) => console.error(error));
+}
 
-    obtenerProductos();
-    obtenerHistorial();
+function agregarProducto() {
+    const form = document.getElementById('addProductForm');
+    const formData = new FormData(form);
+
+    fetch('/add-product', {
+        method: 'POST',
+        body: formData,
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                alert('Producto creado correctamente.');
+                cargarProductos();
+                form.reset();
+            } else {
+                alert('Error al crear el producto.');
+            }
+        })
+        .catch((error) => console.error(error));
+}
+
+function actualizarProducto() {
+    const id = document.getElementById('id_producto_add').value;
+    const nombre = document.getElementById('nombreEdit').value;
+    const precio = document.getElementById('precioEdit').value;
+    const stock = document.getElementById('stockEdit').value;
+    const imagen = document.getElementById('imagenEdit').files[0];
+
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('precio', precio);
+    formData.append('stock', stock);
+    if (imagen) {
+        formData.append('imagen', imagen);
+    }
+
+    fetch(`/actualizar-producto/${id}`, {
+        method: 'POST',
+        body: formData,
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                alert('Producto editado correctamente.');
+                cargarProductos();
+            } else {
+                alert('Error al editar el producto.');
+            }
+        })
+        .catch((error) => console.error(error));
+}
+
+function eliminarProducto() {
+    const productoId = document.getElementById('productoSelectEliminar').value;
+
+    if (!productoId) {
+        alert('Seleccione un producto para eliminar.');
+        return;
+    }
+
+    fetch(`/eliminar-producto/${productoId}`, {
+        method: 'DELETE',
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                alert('Producto eliminado correctamente.');
+                cargarProductos();
+            } else {
+                alert('Error al eliminar el producto.');
+            }
+        })
+        .catch((error) => console.error(error));
+}
+
+document.getElementById('addProductForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    agregarProducto();
 });
+
+document.getElementById('productoSelect').addEventListener('change', cargarDatosProducto);
+
+document.addEventListener('DOMContentLoaded', cargarProductos);

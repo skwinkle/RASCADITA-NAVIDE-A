@@ -7,13 +7,15 @@ const fs = require('fs');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');  // Importamos cookie-parser
 const app = express();
+const async = require('async');
+
 
 app.use(express.json());
 
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '$$I0h17eSi$$',
+    password: 'n0m3l0',
     database: 'PanaderiaDB'
 });
 
@@ -30,6 +32,10 @@ const storage = multer.diskStorage({
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public'))); // Esta línea permite que se sirvan los archivos dentro de public
+
+// Servir archivos de la carpeta "uploads"
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Configurar Express para servir archivos estáticos desde la carpeta "public/html"
 app.use(express.static(path.join(__dirname, 'public', 'html')));
@@ -62,158 +68,146 @@ app.use(session({
 }));
 
 app.post('/add-product', upload.single('imagen'), (req, res) => {
-    const { nombre, precio, stock, descripcion } = req.body;
-    const imagen = req.file ? `/uploads/${req.file.filename}` : null;
+    const { nombre, precio, stock } = req.body;
+    const imagen = req.file ? req.file.filename : null;
 
-    const query = 'INSERT INTO Productos (nombre, precio, stock, imagen) VALUES (?, ?, ?, ?)';
-    db.query(query, [nombre, precio, stock, imagen], (err, result) => {
+    if (!nombre || !precio || !stock) {
+        return res.json({ success: false, message: 'Faltan datos del producto.' });
+    }
+
+    const query = 'INSERT INTO productos (nombre, precio, stock, imagen) VALUES (?, ?, ?, ?)';
+    db.query(query, [nombre, precio, stock, imagen], (err) => {
         if (err) {
-            console.error('Error al insertar producto:', err);
-            return res.status(500).json({ message: 'Error al agregar el producto.' });
+            console.error(err);
+            return res.json({ success: false, message: 'Error al agregar el producto.' });
         }
-        res.json({ success: true });
+        res.json({ success: true, message: 'Producto agregado correctamente.' });
     });
 });
 
 app.post('/realizar-pago/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10);
+
+    // Verifica que el userId esté llegando correctamente
+    console.log('ID de usuario recibido:', userId);
+
     if (!userId) {
-        console.log('ID de usuario no válido.');
         return res.status(400).json({ success: false, message: 'ID de usuario no válido.' });
     }
 
     db.beginTransaction((err) => {
         if (err) {
-            console.log('Error al iniciar la transacción:', err);
             return res.status(500).json({ success: false, message: 'Error al iniciar la transacción.' });
         }
 
-        try {
-            console.log('Iniciando transacción...');
+        db.query(
+            `SELECT c.id_producto, c.cantidad, c.subtotal, p.stock
+            FROM Carrito c
+            JOIN Productos p ON c.id_producto = p.id_producto
+            WHERE c.id_usuario = ?`,
+            [userId],
+            (err, carrito) => {
+                if (err || carrito.length === 0) {
+                    return res.status(400).json({ success: false, message: 'Carrito vacío o error al obtenerlo.' });
+                }
 
-            db.query(
-                `SELECT c.id_producto, c.cantidad, c.subtotal, p.stock
-                 FROM Carrito c 
-                 JOIN Productos p ON c.id_producto = p.id_producto
-                 WHERE c.id_usuario = ?`,
-                [userId],
-                (err, carrito) => {
-                    if (err) {
-                        console.error('Error al obtener el carrito:', err);
-                        return res.status(500).json({ success: false, message: 'Error al obtener el carrito.' });
+                const totalCompra = carrito.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
+
+                db.query('SELECT fondos FROM Usuarios WHERE id_usuario = ?', [userId], (err, usuario) => {
+                    if (err || usuario.length === 0) {
+                        console.error('Error al obtener fondos:', err);
+                        return res.status(500).json({ success: false, message: 'Error al obtener fondos.' });
                     }
 
-                    if (carrito.length === 0) {
-                        console.log('El carrito está vacío.');
-                        throw new Error('El carrito está vacío.');
+                    const fondosActuales = parseFloat(usuario[0].fondos);
+                    console.log('Fondos actuales:', fondosActuales);
+
+                    if (fondosActuales < totalCompra) {
+                        console.log('Fondos insuficientes:', fondosActuales, 'Total compra:', totalCompra);
+                        return res.status(400).json({ success: false, message: 'Fondos insuficientes.' });
                     }
 
-                    const totalCompra = carrito.reduce((sum, item) => sum + parseFloat(item.subtotal), 0);
-                    console.log(`Total de la compra: ${totalCompra}`);
+                    db.query('INSERT INTO Facturas (id_usuario, total) VALUES (?, ?)', [userId, totalCompra], (err, facturaResult) => {
+                        if (err) {
+                            console.error('Error al crear la factura:', err);
+                            return res.status(500).json({ success: false, message: 'Error al crear la factura.' });
+                        }
 
-                    db.query(
-                        'SELECT fondos FROM Usuarios WHERE id_usuario = ?',
-                        [userId],
-                        (err, usuario) => {
-                            if (err) {
-                                console.error('Error al verificar los fondos:', err);
-                                return res.status(500).json({ success: false, message: 'Error al verificar los fondos.' });
+                        const idFactura = facturaResult.insertId;
+                        console.log('Factura creada, ID:', idFactura);
+
+                        carrito.forEach((item) => {
+                            if (item.stock < item.cantidad) {
+                                console.log('Stock insuficiente para el producto ID', item.id_producto);
+                                return res.status(400).json({ success: false, message: `Stock insuficiente para el producto ID ${item.id_producto}.` });
                             }
 
-                            if (usuario.length === 0) {
-                                console.log('Usuario no encontrado.');
-                                return res.status(404).json({ success: false, message: 'Usuario no encontrado.' });
-                            }
-
-                            const fondosActuales = usuario[0].fondos;
-
-                            if (fondosActuales < totalCompra) {
-                                console.log('Fondos insuficientes.');
-                                return res.status(400).json({ success: false, message: 'Fondos insuficientes.' });
-                            }
-
-                            db.query(
-                                'INSERT INTO Facturas (id_usuario, total) VALUES (?, ?)',
-                                [userId, totalCompra],
-                                (err, facturaResult) => {
+                            db.query(`INSERT INTO Detalle_Factura (id_factura, id_producto, cantidad, subtotal) VALUES (?, ?, ?, ?)`, 
+                                [idFactura, item.id_producto, item.cantidad, item.subtotal], (err) => {
                                     if (err) {
-                                        console.error('Error al crear factura:', err);
-                                        return res.status(500).json({ success: false, message: 'Error al crear factura.' });
+                                        console.error('Error al insertar detalles de factura:', err);
+                                        return res.status(500).json({ success: false, message: 'Error al insertar detalles de factura.' });
                                     }
 
-                                    const idFactura = facturaResult.insertId;
-
-                                    carrito.forEach((item) => {
-                                        if (item.stock < item.cantidad) {
-                                            console.log(`Stock insuficiente para el producto con ID ${item.id_producto}.`);
-                                            return res.status(400).json({ success: false, message: `Stock insuficiente para el producto con ID ${item.id_producto}.` });
-                                        }
-
-                                        db.query(
-                                            `INSERT INTO Detalle_Factura (id_factura, id_producto, cantidad, subtotal) 
-                                             VALUES (?, ?, ?, ?)`,
-                                            [idFactura, item.id_producto, item.cantidad, item.subtotal],
-                                            (err) => {
-                                                if (err) {
-                                                    console.error('Error al insertar detalles de factura:', err);
-                                                    return res.status(500).json({ success: false, message: 'Error al insertar detalles de factura.' });
-                                                }
-
-                                                db.query(
-                                                    `UPDATE Productos SET stock = stock - ? WHERE id_producto = ?`,
-                                                    [item.cantidad, item.id_producto],
-                                                    (err) => {
-                                                        if (err) {
-                                                            console.error('Error al actualizar stock de producto:', err);
-                                                            return res.status(500).json({ success: false, message: 'Error al actualizar stock de producto.' });
-                                                        }
-                                                    }
-                                                );
-                                            }
-                                        );
-                                    });
-
-                                    db.query('DELETE FROM Carrito WHERE id_usuario = ?', [userId], (err) => {
+                                    db.query(`UPDATE Productos SET stock = stock - ? WHERE id_producto = ?`, [item.cantidad, item.id_producto], (err) => {
                                         if (err) {
-                                            console.error('Error al vaciar el carrito:', err);
-                                            return res.status(500).json({ success: false, message: 'Error al vaciar el carrito.' });
+                                            console.error('Error al actualizar stock:', err);
+                                            return res.status(500).json({ success: false, message: 'Error al actualizar stock.' });
                                         }
-
-                                        const nuevosFondos = fondosActuales - totalCompra;
-                                        db.query(
-                                            'UPDATE Usuarios SET fondos = ? WHERE id_usuario = ?',
-                                            [nuevosFondos, userId],
-                                            (err) => {
-                                                if (err) {
-                                                    console.error('Error al actualizar fondos:', err);
-                                                    return res.status(500).json({ success: false, message: 'Error al actualizar fondos.' });
-                                                }
-
-                                                console.log('Confirmando transacción...');
-                                                db.commit((err) => {
-                                                    if (err) {
-                                                        console.error('Error al confirmar la transacción:', err);
-                                                        return res.status(500).json({ success: false, message: 'Error al confirmar la transacción.' });
-                                                    }
-                                                    res.json({ success: true, message: 'Pago realizado correctamente.' });
-                                                });
-                                            }
-                                        );
+                                        console.log('Stock actualizado para el producto ID:', item.id_producto);
                                     });
+                                });
+                        });
+
+                        db.query('DELETE FROM Carrito WHERE id_usuario = ?', [userId], (err) => {
+                            if (err) {
+                                console.error('Error al vaciar el carrito:', err);
+                                return res.status(500).json({ success: false, message: 'Error al vaciar el carrito.' });
+                            }
+
+                            const nuevosFondos = fondosActuales - totalCompra;
+                            console.log('Nuevos fondos después de la compra:', nuevosFondos);
+
+                            db.query('UPDATE Usuarios SET fondos = ? WHERE id_usuario = ?', [nuevosFondos, userId], (err) => {
+                                if (err) {
+                                    console.error('Error al actualizar fondos:', err);
+                                    return res.status(500).json({ success: false, message: 'Error al actualizar fondos.' });
                                 }
-                            );
-                        }
-                    );
-                }
-            );
-        } catch (error) {
-            console.error('Error al procesar el pago:', error);
-            db.rollback(() => {
-                res.status(500).json({ success: false, message: 'Error al procesar el pago.' });
-            });
-        }
+
+                                db.commit((err) => {
+                                    if (err) {
+                                        console.error('Error al confirmar transacción:', err);
+                                        return res.status(500).json({ success: false, message: 'Error al confirmar transacción.' });
+                                    }
+                                    console.log('Transacción confirmada exitosamente.');
+                                    res.json({ success: true, message: 'Pago realizado correctamente.' });
+                                });
+                            });
+                        });
+                    });
+                });
+            }
+        );
     });
 });
+
+
+function obtenerFondos(userId) {
+    fetch(`/obtener-fondos/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.fondos !== undefined) {
+                const fondosElement = document.querySelector('.fondos-restantes');
+                if (fondosElement) {
+                    fondosElement.textContent = `Fondos restantes: $${parseFloat(data.fondos).toFixed(2)}`;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener fondos:', error);
+        });
+}
+
 
 
 app.get('/productos', (req, res) => {
@@ -514,7 +508,7 @@ app.post('/agregar-al-carrito', (req, res) => {
 });
 
 app.get('/productos-relacionados', (req, res) => {
-    const userId = req.cookies.userId;
+    const userId = req.headers['user-id'];  // Obtener el userId desde los headers
 
     if (!userId) {
         return res.status(401).json({ message: "No autenticado" });
@@ -534,6 +528,38 @@ app.get('/productos-relacionados', (req, res) => {
         res.json(results);
     });
 });
+
+app.get('/productos-relacionados/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    // Verificar si el userId está presente
+    if (!userId) {
+        return res.status(400).json({ message: 'ID de usuario no válido' });
+    }
+
+    // Consulta para obtener los productos relacionados del usuario
+    const query = `
+        SELECT p.id_producto, p.nombre, p.precio, p.imagen, p.stock
+        FROM Productos p
+        JOIN Carrito c ON p.id_producto = c.id_producto
+        WHERE c.id_usuario = ?;
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error al obtener productos relacionados:', err);
+            return res.status(500).json({ message: 'Error al obtener productos relacionados' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron productos relacionados' });
+        }
+
+        // Responder con los productos encontrados
+        res.json(results);
+    });
+});
+
 
 app.get('/api/usuarios/:id', (req, res) => {
     const userId = req.params.id;
